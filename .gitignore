@@ -1,0 +1,5 @@
+node_modules/
+# The app repository's docs, pulled at build time (pnpm docs:pull).
+/app-docs/
+.vitepress/cache/
+.vitepress/dist/
