@@ -1,0 +1,5 @@
+*.md
+pnpm-lock.yaml
+app-docs/
+.vitepress/cache/
+.vitepress/dist/

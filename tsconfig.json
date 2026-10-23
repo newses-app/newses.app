@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    // VitePress 1's esbuild rejects ES2024; tsc emits nothing, so the target changes no output.
+    "target": "ES2022",
+    "lib": ["ES2024", "DOM"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["*.ts", ".vitepress/**/*.ts", "scripts/**/*.ts"],
+  "exclude": [".vitepress/cache", ".vitepress/dist"]
+}
