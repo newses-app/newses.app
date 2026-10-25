@@ -1,2 +1,6 @@
 allowBuilds:
   esbuild: false
+
+overrides:
+  # VitePress 1 pins vite 5, which has unpatched advisories; its Vue plugin also supports vite 6.
+  vitepress>vite: ^6.4.5
