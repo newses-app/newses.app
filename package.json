@@ -20,6 +20,7 @@
     "test": "vitest run",
     "docs:pull": "node scripts/pull-app-docs.ts",
     "screenshots": "node --env-file-if-exists=screenshots.env scripts/screenshots.ts",
+    "social-card": "node scripts/social-card.ts",
     "dev": "pnpm docs:pull && vitepress dev",
     "build": "pnpm docs:pull && vitepress build",
     "preview": "vitepress preview",

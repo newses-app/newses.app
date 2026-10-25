@@ -78,9 +78,31 @@ const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
       ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
       ['link', { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
     ],
-    // Pulled pages aren't tracked here, so git has no date for them.
+    // Pulled pages aren't tracked here, so git has no date for them, and have no frontmatter.
     transformPageData(pageData) {
-      if (pageData.filePath.startsWith('app-docs/')) delete pageData.lastUpdated;
+      if (!pageData.filePath.startsWith('app-docs/')) return;
+      delete pageData.lastUpdated;
+      const adr = adrs.find((a) => a.link === `/${pageData.relativePath.replace(/\.md$/, '')}`);
+      pageData.description = adr
+        ? `Newses architecture decision record ${adr.number}: ${adr.title}. ${adr.status}.`
+        : 'How Newses is built and deployed: stack, components, data model, APIs, and deployment.';
+    },
+    // Link previews: the page's title and description, and the social card (`pnpm social-card`).
+    transformHead({ pageData, title, description }) {
+      if (pageData.isNotFound) return [];
+      const url = new URL(pageData.relativePath.replace(/(^|\/)index\.md$|\.md$/, '$1'), SITE_URL);
+      return [
+        ['meta', { property: 'og:type', content: 'website' }],
+        ['meta', { property: 'og:site_name', content: 'Newses' }],
+        ['meta', { property: 'og:title', content: title }],
+        ['meta', { property: 'og:description', content: description }],
+        ['meta', { property: 'og:url', content: url.href }],
+        ['meta', { property: 'og:image', content: new URL('/social-card.png', SITE_URL).href }],
+        ['meta', { property: 'og:image:width', content: '1200' }],
+        ['meta', { property: 'og:image:height', content: '630' }],
+        ['meta', { property: 'og:image:alt', content: 'Newses: your feeds, on your own server' }],
+        ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+      ];
     },
     themeConfig: {
       logo: '/favicon.svg',
