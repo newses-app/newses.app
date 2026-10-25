@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2024"],
+    // aws-cdk-lib's jsii-generated types declare optional properties without `| undefined`.
+    "exactOptionalPropertyTypes": false
+  },
+  "include": ["src"],
+  "exclude": []
+}

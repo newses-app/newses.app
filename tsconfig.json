@@ -18,6 +18,6 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["*.ts", ".vitepress/**/*.ts", "scripts/**/*.ts"],
+  "include": ["*.ts", ".vitepress/**/*.ts", ".vitepress/**/*.vue", "scripts/**/*.ts"],
   "exclude": [".vitepress/cache", ".vitepress/dist"]
 }

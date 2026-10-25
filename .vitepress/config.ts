@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import { defineConfig, type DefaultTheme } from 'vitepress';
+import { defineConfig, type DefaultTheme, type UserConfig, type UserConfigFn } from 'vitepress';
 import { readAdrs } from './adr.ts';
 
 /** GitHub links (social link, "Edit this page"); off while the repositories are private. */
@@ -7,6 +7,28 @@ const PUBLIC_REPOS = false as boolean;
 
 /** The stage's origin, for the sitemap. */
 const SITE_URL = process.env.SITE_URL ?? 'https://newses.app';
+
+/**
+ * The app stage's downloads folder, whose `latest.json` the download page reads: `DOWNLOADS_URL`,
+ * else prod's for builds and dev's for `vitepress dev`. The stage allows only the site's own
+ * origins to fetch it, so the dev server proxies it.
+ */
+function downloads(command: 'build' | 'serve'): NonNullable<UserConfig['vite']> {
+  const url = new URL(
+    process.env.DOWNLOADS_URL ??
+      (command === 'serve'
+        ? 'https://reader-dev.newses.app/downloads/'
+        : 'https://reader.newses.app/downloads/'),
+  );
+  const latest = `${url.pathname}latest.json`;
+  return {
+    define: {
+      __DOWNLOADS_URL__: JSON.stringify(url.href),
+      __LATEST_JSON_URL__: JSON.stringify(command === 'serve' ? latest : new URL(latest, url).href),
+    },
+    server: { proxy: { [latest]: { target: url.origin, changeOrigin: true } } },
+  };
+}
 
 const adrs = readAdrs(fileURLToPath(new URL('../app-docs/docs/adr', import.meta.url)));
 
@@ -21,55 +43,66 @@ const github: Pick<DefaultTheme.Config, 'socialLinks' | 'editLink'> = {
   },
 };
 
-export default defineConfig({
-  lang: 'en',
-  title: 'Newses',
-  description: 'Self-hosted, multi-user RSS reader and Tiny Tiny RSS replacement',
-  cleanUrls: true,
-  lastUpdated: true,
-  sitemap: { hostname: SITE_URL },
-  srcExclude: ['README.md', 'AGENTS.md', 'CLAUDE.md', 'app-docs/AGENTS.md'],
-  rewrites: {
-    'app-docs/docs/architecture.md': 'contributing/architecture.md',
-    'app-docs/docs/adr/:file': 'contributing/adr/:file',
-  },
-  head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
-    ['link', { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
-  ],
-  // Pulled pages aren't tracked here, so git has no date for them.
-  transformPageData(pageData) {
-    if (pageData.filePath.startsWith('app-docs/')) delete pageData.lastUpdated;
-  },
-  themeConfig: {
-    logo: '/favicon.svg',
-    search: { provider: 'local' },
-    nav: [
-      { text: 'Guide', link: '/guide/self-hosting', activeMatch: '^/guide/' },
-      { text: 'Contributing', link: '/contributing/architecture', activeMatch: '^/contributing/' },
+const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
+  defineConfig({
+    lang: 'en',
+    title: 'Newses',
+    description: 'Self-hosted, multi-user RSS reader and Tiny Tiny RSS replacement',
+    cleanUrls: true,
+    lastUpdated: true,
+    sitemap: { hostname: SITE_URL },
+    // Page data goes in a script file rather than inline, so the CSP allows inline scripts by hash.
+    metaChunk: true,
+    vite: downloads(command),
+    srcExclude: ['README.md', 'AGENTS.md', 'CLAUDE.md', 'app-docs/AGENTS.md'],
+    rewrites: {
+      'app-docs/docs/architecture.md': 'contributing/architecture.md',
+      'app-docs/docs/adr/:file': 'contributing/adr/:file',
+    },
+    head: [
+      ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+      ['link', { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
     ],
-    sidebar: {
-      '/guide/': [
-        {
-          text: 'Guide',
-          items: [
-            { text: 'Self-hosting', link: '/guide/self-hosting' },
-            { text: 'Migrating from TTRSS', link: '/guide/migration-ttrss' },
-          ],
-        },
-      ],
-      '/contributing/': [
+    // Pulled pages aren't tracked here, so git has no date for them.
+    transformPageData(pageData) {
+      if (pageData.filePath.startsWith('app-docs/')) delete pageData.lastUpdated;
+    },
+    themeConfig: {
+      logo: '/favicon.svg',
+      search: { provider: 'local' },
+      nav: [
+        { text: 'Guide', link: '/guide/self-hosting', activeMatch: '^/guide/' },
         {
           text: 'Contributing',
-          items: [{ text: 'Architecture', link: '/contributing/architecture' }],
+          link: '/contributing/architecture',
+          activeMatch: '^/contributing/',
         },
-        {
-          text: 'Decision records',
-          collapsed: true,
-          items: adrs.map((adr) => ({ text: `${adr.number}. ${adr.title}`, link: adr.link })),
-        },
+        { text: 'Download', link: '/download' },
       ],
+      sidebar: {
+        '/guide/': [
+          {
+            text: 'Guide',
+            items: [
+              { text: 'Self-hosting', link: '/guide/self-hosting' },
+              { text: 'Migrating from TTRSS', link: '/guide/migration-ttrss' },
+            ],
+          },
+        ],
+        '/contributing/': [
+          {
+            text: 'Contributing',
+            items: [{ text: 'Architecture', link: '/contributing/architecture' }],
+          },
+          {
+            text: 'Decision records',
+            collapsed: true,
+            items: adrs.map((adr) => ({ text: `${adr.number}. ${adr.title}`, link: adr.link })),
+          },
+        ],
+      },
+      ...(PUBLIC_REPOS ? github : {}),
     },
-    ...(PUBLIC_REPOS ? github : {}),
-  },
-});
+  });
+
+export default config;

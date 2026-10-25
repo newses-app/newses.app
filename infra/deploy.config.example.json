@@ -1,0 +1,31 @@
+{
+  "resourcePrefix": "newses-site",
+  "budgetProject": "newses",
+  "account": "123456789012",
+  "region": "us-east-2",
+  "githubRepo": "owner/newses.app",
+  "appRepo": "owner/newses",
+  "githubConnectionArn": "arn:aws:codeconnections:us-east-2:123456789012:connection/00000000-0000-0000-0000-000000000000",
+  "certificateArn": "arn:aws:acm:us-east-1:123456789012:certificate/00000000-0000-0000-0000-000000000000",
+  "hostedZone": { "zoneName": "example.com", "hostedZoneId": "Z0000000000EXAMPLE" },
+  "stages": [
+    {
+      "name": "dev",
+      "branch": "dev",
+      "appBranch": "dev",
+      "domainName": "dev.example.com",
+      "redirectFrom": [],
+      "noindex": true,
+      "downloadsUrl": "https://reader-dev.example.com/downloads/"
+    },
+    {
+      "name": "prod",
+      "branch": "main",
+      "appBranch": "main",
+      "domainName": "example.com",
+      "redirectFrom": ["www.example.com"],
+      "noindex": false,
+      "downloadsUrl": "https://reader.example.com/downloads/"
+    }
+  ]
+}

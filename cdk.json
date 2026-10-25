@@ -1,0 +1,7 @@
+{
+  "app": "node infra/src/main.ts",
+  "output": "infra/cdk.out",
+  "context": {
+    "@aws-cdk/core:newStyleStackSynthesis": true
+  }
+}

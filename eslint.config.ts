@@ -6,7 +6,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-  globalIgnores(['app-docs/', '.vitepress/cache/', '.vitepress/dist/']),
+  globalIgnores(['app-docs/', '.vitepress/cache/', '.vitepress/dist/', 'infra/cdk.out/']),
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
   {

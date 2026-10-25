@@ -3,3 +3,6 @@ node_modules/
 /app-docs/
 .vitepress/cache/
 .vitepress/dist/
+# The AWS deployment config, kept in SSM (see AGENTS.md).
+/infra/deploy.config.json
+/infra/cdk.out/
