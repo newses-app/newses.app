@@ -53,6 +53,21 @@ const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
     sitemap: { hostname: SITE_URL },
     // Page data goes in a script file rather than inline, so the CSP allows inline scripts by hash.
     metaChunk: true,
+    markdown: {
+      // Mermaid fences become diagrams, drawn in the browser (MermaidDiagram.vue).
+      config(md) {
+        const fence = md.renderer.rules.fence;
+        md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+          const token = tokens[idx];
+          if (token?.info.trim() === 'mermaid') {
+            return `<MermaidDiagram code="${encodeURIComponent(token.content)}" />`;
+          }
+          return fence
+            ? fence(tokens, idx, options, env, self)
+            : self.renderToken(tokens, idx, options);
+        };
+      },
+    },
     vite: downloads(command),
     srcExclude: ['README.md', 'AGENTS.md', 'CLAUDE.md', 'app-docs/AGENTS.md'],
     rewrites: {
@@ -69,6 +84,7 @@ const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
     },
     themeConfig: {
       logo: '/favicon.svg',
+      footer: { message: 'Released under the AGPL-3.0-or-later license.' },
       search: { provider: 'local' },
       nav: [
         { text: 'Guide', link: '/guide/getting-started', activeMatch: '^/guide/' },

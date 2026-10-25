@@ -6,3 +6,5 @@ node_modules/
 # The AWS deployment config, kept in SSM (see AGENTS.md).
 /infra/deploy.config.json
 /infra/cdk.out/
+# Credentials for pnpm screenshots.
+/screenshots.env

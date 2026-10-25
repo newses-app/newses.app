@@ -19,6 +19,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "docs:pull": "node scripts/pull-app-docs.ts",
+    "screenshots": "node --env-file-if-exists=screenshots.env scripts/screenshots.ts",
     "dev": "pnpm docs:pull && vitepress dev",
     "build": "pnpm docs:pull && vitepress build",
     "preview": "vitepress preview",
@@ -35,6 +36,7 @@
     "eslint-plugin-vue": "^10.11.1",
     "globals": "^17.13.0",
     "jiti": "^2.7.0",
+    "playwright": "^1.64.1",
     "prettier": "^3.9.9",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.0",
@@ -45,6 +47,7 @@
     "zod": "^4.6.7"
   },
   "dependencies": {
+    "mermaid": "^12.2.0",
     "vitepress": "^1.6.4",
     "vue": "^3.5.44"
   }
