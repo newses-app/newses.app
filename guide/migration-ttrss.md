@@ -1,3 +1,7 @@
+---
+description: Import users, categories, feeds, articles, labels, tags, filters, and settings from a Tiny Tiny RSS database into Newses.
+---
+
 # Migrating from TTRSS
 
 The importer reads a TTRSS PostgreSQL database directly and writes into this instance. It never writes to the source; all reads run in a read-only transaction.
@@ -30,8 +34,8 @@ Behaviour:
    ```
    docker compose exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" -Fc "$POSTGRES_DB"' > ttrss.dump
    ```
-2. Copy the dump to a machine with this repository checked out and Docker running.
-3. From the repository root, import into the running Docker stack in `docker/`, or into an AWS stage:
+2. Copy the dump to a machine with a checkout of [newses-app/newses](https://github.com/newses-app/newses) and Docker running.
+3. From that checkout's root, import into the running Docker stack in `docker/`, or into an AWS stage:
    ```
    scripts/import-ttrss.sh ttrss.dump
    scripts/import-ttrss.sh ttrss.dump --aws dev

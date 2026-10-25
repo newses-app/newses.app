@@ -71,10 +71,10 @@ const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
       logo: '/favicon.svg',
       search: { provider: 'local' },
       nav: [
-        { text: 'Guide', link: '/guide/self-hosting', activeMatch: '^/guide/' },
+        { text: 'Guide', link: '/guide/getting-started', activeMatch: '^/guide/' },
         {
           text: 'Contributing',
-          link: '/contributing/architecture',
+          link: '/contributing/',
           activeMatch: '^/contributing/',
         },
         { text: 'Download', link: '/download' },
@@ -82,20 +82,44 @@ const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
       sidebar: {
         '/guide/': [
           {
-            text: 'Guide',
+            text: 'Run Newses',
             items: [
-              { text: 'Self-hosting', link: '/guide/self-hosting' },
+              { text: 'Getting started', link: '/guide/getting-started' },
+              { text: 'Self-hosting with Docker', link: '/guide/self-hosting' },
               { text: 'Migrating from TTRSS', link: '/guide/migration-ttrss' },
             ],
           },
+          {
+            text: 'Use Newses',
+            items: [
+              { text: 'Reading', link: '/guide/reading' },
+              { text: 'Feeds', link: '/guide/feeds' },
+              { text: 'Labels, tags, notes, and scores', link: '/guide/organising' },
+              { text: 'Keyboard shortcuts', link: '/guide/shortcuts' },
+              { text: 'Sharing', link: '/guide/sharing' },
+              { text: 'Account and security', link: '/guide/account' },
+            ],
+          },
+          {
+            text: 'Apps',
+            items: [
+              { text: 'Desktop and Android apps', link: '/guide/apps' },
+              { text: 'Third-party clients', link: '/guide/clients' },
+            ],
+          },
+          { text: 'Help', items: [{ text: 'FAQ', link: '/guide/faq' }] },
         ],
         '/contributing/': [
           {
             text: 'Contributing',
-            items: [{ text: 'Architecture', link: '/contributing/architecture' }],
+            items: [
+              { text: 'Setup and conventions', link: '/contributing/' },
+              { text: 'Architecture', link: '/contributing/architecture' },
+            ],
           },
           {
             text: 'Decision records',
+            link: '/contributing/adr/',
             collapsed: true,
             items: adrs.map((adr) => ({ text: `${adr.number}. ${adr.title}`, link: adr.link })),
           },

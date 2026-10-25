@@ -36,8 +36,9 @@ export function installers(manifest: ReleaseManifest): Installer[] {
       ? [{ platform: 'windows' as const, label: 'Windows portable', file: windows.portable }]
       : []),
     { platform: 'windows' as const, label: 'Windows zip', file: windows.zip },
-    { platform: 'linux' as const, label: 'Linux AppImage', file: linux.appImage },
+    // AppArmor stops the AppImage's sandbox on Ubuntu 24.04 and later.
     { platform: 'linux' as const, label: 'Linux deb', file: linux.deb },
+    { platform: 'linux' as const, label: 'Linux AppImage', file: linux.appImage },
     { platform: 'android' as const, label: 'Android APK', file: android },
   ];
 }

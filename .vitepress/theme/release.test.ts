@@ -33,8 +33,8 @@ describe('installers', () => {
       'Windows installer',
       'Windows portable',
       'Windows zip',
-      'Linux AppImage',
       'Linux deb',
+      'Linux AppImage',
       'Android APK',
     ]);
   });

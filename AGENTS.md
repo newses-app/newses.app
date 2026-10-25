@@ -41,9 +41,21 @@ The Newses project site at `newses.app`: landing page, user guides, contributor 
 
 | Page | Owns |
 |---|---|
-| `guide/self-hosting.md` | Operating a Docker deployment: install, configuration, upgrade, proxy, backup, restore |
+| `guide/getting-started.md` | Docker quickstart to the first feed; includes `self-hosting.md`'s `#commands` and `#install` regions |
+| `guide/self-hosting.md` | Operating a Docker deployment: install, configuration, users, logs, monitoring, upgrade, proxy, backup, restore, moving |
 | `guide/migration-ttrss.md` | Importing data from an existing TTRSS instance |
+| `guide/reading.md` | Sidebar and special feeds, the article list, article actions, full text, images, the archive, appearance, offline in the browser |
+| `guide/feeds.md` | Subscribing, OPML, categories, per-feed options |
+| `guide/organising.md` | Labels, tags, notes, scores, filters |
+| `guide/shortcuts.md` | Default keyboard shortcuts and remapping |
+| `guide/sharing.md` | Published feed, publishing pages, bookmarklets, share links |
+| `guide/account.md` | Password, two-factor sign-in, signed-in devices, adding users |
+| `guide/apps.md` | Desktop and Android apps: install, connect, profiles, updates, offline, desktop options, data |
+| `guide/clients.md` | TTRSS and Google Reader clients: app passwords, server URLs, known clients, what carries over |
+| `guide/faq.md` | Short answers that link to the page owning each fact |
 | `download.md` | The latest release's installers, read from the app stage's `latest.json` in the browser |
+| `contributing/index.md` | Development setup; the commands and code conventions are included from the app's `AGENTS.md` regions (`#commands`, `#conventions`) |
+| `contributing/adr/index.md` | The ADR index, generated from the pulled ADRs (`.vitepress/adr.data.ts`) |
 | `/contributing/` (pulled) | Architecture and ADRs, owned by the app repository; change them there |
 
 Put each new fact in the page that owns it. Never state the same fact in two places: include a fact the app repository owns (`<!--@include: …-->`) rather than restating it.

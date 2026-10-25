@@ -1,14 +1,22 @@
+---
+description: Install, configure, upgrade, back up, and move a Newses server running on Docker.
+---
+
 # Self-hosting with Docker
 
-Commands run from the repository root. `C` stands for `docker compose -f docker/compose.yaml`.
+<!-- #region commands -->
+Commands run from the root of a checkout of [newses-app/newses](https://github.com/newses-app/newses). `C` stands for `docker compose -f docker/compose.yaml`.
+<!-- #endregion commands -->
 
 ## Install
 
+<!-- #region install -->
 1. `cp docker/.env.example docker/.env`, set `POSTGRES_PASSWORD`, and set `APP_SECRET` to the output of `openssl rand -base64 48`.
 2. Set `ADMIN_LOGIN` and `ADMIN_PASSWORD` for the first admin, or create it with the CLI after step 3.
 3. `C up -d --build`
 
 `migrate` runs once and exits. `server` and `worker` start after it succeeds. The app listens on `HTTP_PORT` (default 8080): open it in a browser and sign in. `GET /healthz` returns `200` with `{"status":"ok"}` when the database and job queue are reachable.
+<!-- #endregion install -->
 
 ## Configuration
 
@@ -122,7 +130,7 @@ The desktop and mobile apps need HTTPS. The proxy must forward the `Authorizatio
 
 ## Apps
 
-Install the desktop and Android apps from an AWS stage's `https://<domain>/downloads/` (see `docs/architecture.md`) and enter the server's HTTPS address at first launch; they update themselves from there. The proxy needs the headers above.
+Install the desktop and Android apps from [Download](/download) and enter the server's HTTPS address at first launch; see [Desktop and Android apps](./apps). The proxy needs the headers above.
 
 ## Backups
 
@@ -140,7 +148,7 @@ Install the desktop and Android apps from an AWS stage's `https://<domain>/downl
 
 ## Moving to another instance
 
-Moves everything to another Docker host or an AWS stage, or from an AWS stage to Docker (`--aws dev|prod` on either script; bundle contents in `docs/architecture.md`). The target must run the same version of Newses or a newer one.
+Moves everything to another Docker host or an AWS stage, or from an AWS stage to Docker (`--aws dev|prod` on either script; bundle contents in [Architecture](/contributing/architecture#moving-an-instance)). The target must run the same version of Newses or a newer one.
 
 1. Start the target: `C up -d` on the new host, with its own `APP_SECRET`.
 2. On the source: `scripts/export-instance.sh newses-bundle --freeze`. The source stays stopped; `C start server worker` restarts it. Without `--freeze` it keeps running, and changes after the export are lost.
