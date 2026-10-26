@@ -4,7 +4,7 @@ description: Organise Newses articles with labels, tags, notes, and scores, and 
 
 # Labels, tags, notes, and scores
 
-| | Labels | Tags | Notes |
+| <span class="visually-hidden">Property</span> | Labels | Tags | Notes |
 |---|---|---|---|
 | What | A set of coloured labels you define | Free-text words | Your text on one article |
 | Where to browse | Each label is a sidebar feed with an unread count | "Tags" in the sidebar, or `g t` | Shown on the article and in the list; found by search |

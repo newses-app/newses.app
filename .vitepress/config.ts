@@ -30,6 +30,10 @@ function downloads(command: 'build' | 'serve'): NonNullable<UserConfig['vite']> 
   };
 }
 
+/** A component in the site's theme, replacing one of the default theme's. */
+const theme = (component: string) =>
+  fileURLToPath(new URL(`./theme/components/${component}`, import.meta.url));
+
 const adrs = readAdrs(fileURLToPath(new URL('../app-docs/docs/adr', import.meta.url)));
 
 const github: Pick<DefaultTheme.Config, 'socialLinks' | 'editLink'> = {
@@ -68,7 +72,16 @@ const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
         };
       },
     },
-    vite: downloads(command),
+    vite: {
+      ...downloads(command),
+      // The default theme leaves the home and 404 pages without a main landmark.
+      resolve: {
+        alias: [
+          { find: /^.*\/VPHome\.vue$/, replacement: theme('HomeMain.vue') },
+          { find: /^.*\/NotFound\.vue$/, replacement: theme('SiteNotFound.vue') },
+        ],
+      },
+    },
     srcExclude: ['README.md', 'AGENTS.md', 'CLAUDE.md', 'app-docs/AGENTS.md'],
     rewrites: {
       'app-docs/docs/architecture.md': 'contributing/architecture.md',
@@ -78,8 +91,10 @@ const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
       ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
       ['link', { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
     ],
-    // Pulled pages aren't tracked here, so git has no date for them, and have no frontmatter.
+    // Pulled pages aren't tracked here, so git has no date for them, and have no frontmatter. A
+    // page's `lastUpdated: false` only hides the date, leaving an empty footer landmark.
     transformPageData(pageData) {
+      if (pageData.frontmatter.lastUpdated === false) delete pageData.lastUpdated;
       if (!pageData.filePath.startsWith('app-docs/')) return;
       delete pageData.lastUpdated;
       const adr = adrs.find((a) => a.link === `/${pageData.relativePath.replace(/\.md$/, '')}`);

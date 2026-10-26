@@ -35,6 +35,8 @@ async function render(): Promise<void> {
     startOnLoad: false,
     securityLevel: 'strict',
     theme: isDark.value ? 'dark' : 'default',
+    // The dark theme's edge labels fall just short of 4.5:1 contrast on its own background.
+    themeVariables: isDark.value ? { edgeLabelBackground: '#4a4a4a' } : {},
     fontFamily: getComputedStyle(document.body).fontFamily,
     // Sized by the viewer below, from the diagram's own size.
     flowchart: { useMaxWidth: false },
@@ -197,6 +199,7 @@ watch(isDark, render);
           '--diagram-height': `${String(size.height * scale)}px`,
         }"
         tabindex="0"
+        role="group"
         aria-label="Diagram"
         @pointerdown="onPointerDown"
         @pointermove="onPointerMove"

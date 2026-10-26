@@ -21,12 +21,14 @@
     "docs:pull": "node scripts/pull-app-docs.ts",
     "screenshots": "node --env-file-if-exists=screenshots.env scripts/screenshots.ts",
     "social-card": "node scripts/social-card.ts",
+    "a11y": "node scripts/a11y.ts",
     "dev": "pnpm docs:pull && vitepress dev",
     "build": "pnpm docs:pull && vitepress build",
     "preview": "vitepress preview",
     "cdk": "cdk"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.19.1",
     "aws-cdk": "^2.1146.0",
