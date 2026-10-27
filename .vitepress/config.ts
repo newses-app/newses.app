@@ -2,9 +2,6 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig, type DefaultTheme, type UserConfig, type UserConfigFn } from 'vitepress';
 import { readAdrs } from './adr.ts';
 
-/** GitHub links (social link, "Edit this page"); off while the repositories are private. */
-const PUBLIC_REPOS = false as boolean;
-
 /** The stage's origin, for the sitemap. */
 const SITE_URL = process.env.SITE_URL ?? 'https://newses.app';
 
@@ -35,17 +32,6 @@ const theme = (component: string) =>
   fileURLToPath(new URL(`./theme/components/${component}`, import.meta.url));
 
 const adrs = readAdrs(fileURLToPath(new URL('../app-docs/docs/adr', import.meta.url)));
-
-const github: Pick<DefaultTheme.Config, 'socialLinks' | 'editLink'> = {
-  socialLinks: [{ icon: 'github', link: 'https://github.com/newses-app/newses' }],
-  editLink: {
-    // Serialized into the client, so it can use nothing outside itself.
-    pattern: ({ filePath }) =>
-      filePath.startsWith('app-docs/')
-        ? `https://github.com/newses-app/newses/edit/dev/${filePath.slice('app-docs/'.length)}`
-        : `https://github.com/newses-app/newses.app/edit/dev/${filePath}`,
-  },
-};
 
 const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
   defineConfig({
@@ -178,7 +164,14 @@ const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
           },
         ],
       },
-      ...(PUBLIC_REPOS ? github : {}),
+      socialLinks: [{ icon: 'github', link: 'https://github.com/newses-app/newses' }],
+      editLink: {
+        // Serialized into the client, so it can use nothing outside itself.
+        pattern: ({ filePath }) =>
+          filePath.startsWith('app-docs/')
+            ? `https://github.com/newses-app/newses/edit/dev/${filePath.slice('app-docs/'.length)}`
+            : `https://github.com/newses-app/newses.app/edit/dev/${filePath}`,
+      },
     },
   });
 

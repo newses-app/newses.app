@@ -29,7 +29,6 @@ The Newses project site at `newses.app`: landing page, user guides, contributor 
 - `app-docs/` is generated; never edit it. Pulled pages are served under `/contributing/` by `rewrites` in `.vitepress/config.ts`, and the ADR sidebar is generated from their titles (`.vitepress/adr.ts`).
 - Mermaid fences render as diagrams in the browser (`MermaidDiagram.vue`, mermaid loaded only on pages that have one); without scripts, their source shows.
 - `HomeMain.vue` and `SiteNotFound.vue` replace the default theme's home and 404 components (aliases in `.vitepress/config.ts`), so those pages have a main landmark.
-- `PUBLIC_REPOS` in `.vitepress/config.ts` switches on the GitHub social link and "Edit this page"; it stays off while the repositories are private.
 - The site publishes only the project, and self-hosters never reuse it, so it may hardcode the project's URLs (`newses.app`, the app stages, the GitHub repositories). The app repository's rule against hardcoded URLs doesn't apply here; account-specific values for the CDK app still come from `infra/deploy.config.json`.
 
 ## Hosting
