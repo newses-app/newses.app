@@ -65,6 +65,7 @@ The Newses project site at `newses.app`: landing page, user guides, contributor 
 | `contributing/index.md` | Development setup; the commands and code conventions are included from the app's `AGENTS.md` regions (`#commands`, `#conventions`) |
 | `contributing/adr/index.md` | The ADR index, generated from the pulled ADRs (`.vitepress/adr.data.ts`) |
 | `/contributing/` (pulled) | Architecture and ADRs, owned by the app repository; change them there |
+| `CONTRIBUTING.md`, `README.md` | Pull requests to this repository; everything else about contributing points to the app repository's community files |
 
 Put each new fact in the page that owns it. Never state the same fact in two places: include a fact the app repository owns (`<!--@include: …-->`) rather than restating it.
 

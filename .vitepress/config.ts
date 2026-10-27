@@ -82,7 +82,7 @@ const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
         ],
       },
     },
-    srcExclude: ['README.md', 'AGENTS.md', 'CLAUDE.md', 'app-docs/AGENTS.md'],
+    srcExclude: ['README.md', 'CONTRIBUTING.md', 'AGENTS.md', 'CLAUDE.md', 'app-docs/AGENTS.md'],
     rewrites: {
       'app-docs/docs/architecture.md': 'contributing/architecture.md',
       'app-docs/docs/adr/:file': 'contributing/adr/:file',
