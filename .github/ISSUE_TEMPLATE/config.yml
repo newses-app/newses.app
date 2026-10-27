@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Problem with Newses itself
+    url: https://github.com/newses-app/newses/issues/new/choose
+    about: The server, the web, desktop, and Android apps, and the architecture and decision records.
+  - name: Report a vulnerability
+    url: https://github.com/newses-app/newses/security/advisories/new
+    about: Privately, as the security policy describes; never in a public issue.
