@@ -25,7 +25,8 @@
       "domainName": "example.com",
       "redirectFrom": ["www.example.com"],
       "noindex": false,
-      "downloadsUrl": "https://reader.example.com/downloads/"
+      "downloadsUrl": "https://reader.example.com/downloads/",
+      "inboundEmail": { "addresses": ["conduct@example.com"] }
     }
   ]
 }

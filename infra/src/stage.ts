@@ -7,6 +7,7 @@ import {
   resourceName,
   type SiteStageConfig,
 } from './deploy-config.ts';
+import { MailStack } from './mail-stack.ts';
 import { ManagedLogGroups } from './managed-log-groups.ts';
 import { SiteStack } from './site-stack.ts';
 
@@ -19,6 +20,8 @@ export interface SiteStageProps extends StageProps {
 /** One deployment of the site. Tagged with the app's project, so its budget counts the site. */
 export class SiteStage extends Stage {
   readonly site: SiteStack;
+  /** On the stage that receives email. */
+  readonly mail: MailStack | undefined;
 
   constructor(scope: Construct, id: string, props: SiteStageProps) {
     super(scope, id, props);
@@ -33,5 +36,13 @@ export class SiteStage extends Stage {
       stage,
       ...(props.siteDir !== undefined && { siteDir: props.siteDir }),
     });
+    this.mail =
+      stage.inboundEmail &&
+      new MailStack(this, 'Mail', {
+        env: { account: ACCOUNT, region: REGION },
+        stackName: resourceName(stage, 'mail'),
+        stage,
+        addresses: stage.inboundEmail.addresses,
+      });
   }
 }

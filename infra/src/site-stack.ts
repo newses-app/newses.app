@@ -15,6 +15,7 @@ import {
   REPO_ROOT,
   resourceName,
   type SiteStageConfig,
+  zoneRecordName,
 } from './deploy-config.ts';
 import { siteRoutes } from './site-routes.ts';
 
@@ -129,10 +130,7 @@ export class SiteStack extends Stack {
       new route53Targets.CloudFrontTarget(this.distribution),
     );
     for (const domain of [stage.domainName, ...stage.redirectFrom]) {
-      const recordName =
-        domain === HOSTED_ZONE.zoneName
-          ? undefined
-          : domain.slice(0, -HOSTED_ZONE.zoneName.length - 1);
+      const recordName = zoneRecordName(domain);
       const id = recordName ?? 'Apex';
       new route53.ARecord(this, `${id}Alias`, { zone, recordName, target });
       new route53.AaaaRecord(this, `${id}AliasV6`, { zone, recordName, target });

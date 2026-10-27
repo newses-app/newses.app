@@ -115,6 +115,73 @@ describe('SiteStage', () => {
   });
 });
 
+describe('MailStack', () => {
+  const mail = prodStage.mail && Template.fromStack(prodStage.mail);
+  if (!mail) throw new Error('prod receives email');
+
+  it('exists only on the stage that receives email', () => {
+    expect(devStage.mail).toBeUndefined();
+    expect(prodStage.mail?.stackName).toBe('newses-site-prod-mail');
+  });
+
+  it('verifies the domain and points its MX at SES in the region', () => {
+    mail.hasResourceProperties('AWS::SES::EmailIdentity', { EmailIdentity: 'example.com' });
+    mail.hasResourceProperties('AWS::Route53::RecordSet', {
+      Type: 'MX',
+      Name: 'example.com.',
+      ResourceRecords: [`10 inbound-smtp.${REGION}.amazonaws.com`],
+    });
+  });
+
+  it("publishes the addresses' mail, scanned and over TLS, to the topic", () => {
+    mail.hasResourceProperties('AWS::SES::ReceiptRule', {
+      RuleSetName: Match.anyValue(),
+      Rule: Match.objectLike({
+        Name: 'newses-site-prod-mail-forward',
+        Enabled: true,
+        Recipients: ['conduct@example.com'],
+        ScanEnabled: true,
+        TlsPolicy: 'Require',
+        Actions: [{ SNSAction: { Encoding: 'UTF-8', TopicArn: Match.anyValue() } }],
+      }),
+    });
+    const [policy] = Object.values(mail.findResources('AWS::SNS::TopicPolicy')) as {
+      Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } };
+    }[];
+    const [statement] = policy?.Properties.PolicyDocument.Statement ?? [];
+    expect(statement).toMatchObject({
+      Principal: { Service: 'ses.amazonaws.com' },
+      Action: 'sns:Publish',
+      Condition: { StringEquals: { 'aws:SourceAccount': ACCOUNT } },
+    });
+    expect(JSON.stringify(statement)).toContain(
+      `:ses:${REGION}:${ACCOUNT}:receipt-rule-set/newses-site-prod-mail:receipt-rule/newses-site-prod-mail-forward`,
+    );
+  });
+
+  it('gives the activation function a log group the stack owns', () => {
+    for (const fn of Object.values(mail.findResources('AWS::Lambda::Function')) as {
+      Properties: { LoggingConfig?: { LogGroup?: unknown } };
+    }[]) {
+      expect(fn.Properties.LoggingConfig?.LogGroup).toBeDefined();
+    }
+  });
+
+  it('activates the rule set, and deactivates it on delete', () => {
+    const [activate] = Object.values(mail.findResources('Custom::AWS')) as {
+      Properties: { Create: string; Delete: string };
+    }[];
+    expect(JSON.parse(activate?.Properties.Create ?? '{}')).toMatchObject({
+      action: 'setActiveReceiptRuleSet',
+      parameters: { RuleSetName: 'newses-site-prod-mail' },
+    });
+    expect(JSON.parse(activate?.Properties.Delete ?? '{}')).toMatchObject({
+      action: 'setActiveReceiptRuleSet',
+      parameters: {},
+    });
+  });
+});
+
 describe('PipelineStack', () => {
   const template = (stage: typeof dev) =>
     Template.fromStack(

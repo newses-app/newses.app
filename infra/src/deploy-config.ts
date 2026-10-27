@@ -17,6 +17,8 @@ const stageSchema = z.object({
   noindex: z.boolean(),
   /** The app stage's downloads folder, whose `latest.json` the download page reads. */
   downloadsUrl: z.url({ protocol: /^https$/ }).endsWith('/'),
+  /** Addresses at `domainName` whose mail SES receives and publishes to the stage's mail topic. */
+  inboundEmail: z.object({ addresses: z.array(z.email()).min(1) }).optional(),
 });
 
 export type SiteStageConfig = z.infer<typeof stageSchema>;
@@ -58,6 +60,17 @@ export const deployConfigSchema = z
     if (new Set(config.stages.map((stage) => stage.name)).size !== config.stages.length) {
       ctx.addIssue({ code: 'custom', message: 'stage names repeat' });
     }
+    for (const stage of config.stages) {
+      for (const address of stage.inboundEmail?.addresses ?? []) {
+        if (!address.endsWith(`@${stage.domainName}`)) {
+          ctx.addIssue({ code: 'custom', message: `${address} is not at ${stage.domainName}` });
+        }
+      }
+    }
+    // An account has one active receipt rule set per region.
+    if (config.stages.filter((stage) => stage.inboundEmail).length > 1) {
+      ctx.addIssue({ code: 'custom', message: 'only one stage can receive email' });
+    }
   });
 
 // The deployment's account-specific values, from `infra/deploy.config.json` (not committed; see
@@ -87,6 +100,10 @@ export const STAGES: SiteStageConfig[] = config.stages;
 
 /** String parameter with this config, which the pipelines' synth step fetches. */
 export const DEPLOY_CONFIG_PARAMETER = `/${PREFIX}/deploy-config`;
+
+/** A domain's record name in the hosted zone; undefined for the zone's apex. */
+export const zoneRecordName = (domain: string) =>
+  domain === HOSTED_ZONE.zoneName ? undefined : domain.slice(0, -HOSTED_ZONE.zoneName.length - 1);
 
 /** Physical name for a stage's resource, `<prefix>-<stage>-<parts>`. */
 export const resourceName = (stage: SiteStageConfig, ...parts: string[]) =>

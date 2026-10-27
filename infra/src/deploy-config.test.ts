@@ -20,6 +20,18 @@ describe('deploy config', () => {
     expect(withProd({ redirectFrom: ['dev.example.com'] }).success).toBe(false);
   });
 
+  it("receives email only at the stage's domain, on one stage", () => {
+    expect(withProd({ inboundEmail: { addresses: ['conduct@example.org'] } }).success).toBe(false);
+    expect(withProd({ inboundEmail: { addresses: ['conduct@dev.example.com'] } }).success).toBe(
+      false,
+    );
+    const both = deployConfigSchema.safeParse({
+      ...example,
+      stages: [{ ...dev, inboundEmail: { addresses: ['conduct@dev.example.com'] } }, prod],
+    });
+    expect(both.success).toBe(false);
+  });
+
   it('needs an HTTPS downloads folder', () => {
     expect(withProd({ downloadsUrl: 'http://reader.example.com/downloads/' }).success).toBe(false);
     expect(withProd({ downloadsUrl: 'https://reader.example.com/downloads' }).success).toBe(false);

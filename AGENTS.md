@@ -19,6 +19,7 @@ The Newses project site at `newses.app`: landing page, user guides, contributor 
 | `pnpm a11y` | axe (WCAG 2.2 AA and best practices) on every page in the sitemap and the 404 page, light and dark, plus the home and download pages on a phone; reads `A11Y_URL` (default `pnpm preview`'s `http://localhost:4173`), exits non-zero on any violation. Not part of `pnpm check` |
 | `pnpm cdk synth` | Synthesise the site's pipelines and stacks (build the site first: its inline scripts' hashes go in the CSP); deployments run through the pipelines |
 | `aws ssm put-parameter --name /<prefix>/deploy-config --type String --overwrite --value file://infra/deploy.config.json` | Store the AWS deployment config (gitignored; copy `infra/deploy.config.example.json`) where the pipelines' synth reads it; needed by `cdk` locally too |
+| `aws sns subscribe --topic-arn arn:aws:sns:<region>:<account>:<prefix>-prod-mail --protocol email --notification-endpoint ADDRESS` | Delivers mail received at the `inboundEmail` addresses to ADDRESS, once confirmed from the email AWS sends; each arrives as an SNS notification with the raw message under `content` |
 | `pnpm cdk deploy <prefix>-dev-pipeline` (and `<prefix>-prod-pipeline`) | Create a stage's pipeline, once; it runs on creation, and later changes deploy through it |
 
 ## Code conventions
@@ -36,6 +37,7 @@ The Newses project site at `newses.app`: landing page, user guides, contributor 
 - `infra/` is the CDK app, in the app's AWS account: per stage, a self-mutating pipeline (`<prefix>-<stage>-pipeline`) and the site stack (`<prefix>-<stage>-site`: private S3 bucket, CloudFront, Route 53 aliases). Physical names start with the config's `resourcePrefix`; everything is tagged `project=<budgetProject>`, so the app's project budget counts it.
 - The pipeline runs on every push to the stage's branch, and on pushes to the app repository's matching branch that change `docs/architecture.md`, `docs/adr/`, or `AGENTS.md`. It runs `pnpm check`, builds with the app checkout as `NEWSES_APP_DIR`, deploys, and smoke-tests the headers, the 404 page, and the `www` redirect.
 - CloudFront redirects other hosts (`www`) to the stage's domain, serves clean URLs from their `.html` files and folders from `index.html`, and answers unknown paths with `404.html`. `assets/` is cached for a year and kept across deployments; everything else is revalidated, pruned, and invalidated on each deployment.
+- Mail: the stage with `inboundEmail` (prod) gets the mail stack (`<prefix>-<stage>-mail`): the domain verified in SES by Easy DKIM, an MX record to SES's inbound endpoint in the region, and a receipt rule that publishes the listed addresses' mail (scanned, TLS only, raw MIME up to 150 KB; larger mail bounces) to the `<prefix>-<stage>-mail` topic. It owns the account's one active receipt rule set in the region. Mail can't be sent from these addresses; replies come from your own.
 - Headers: HSTS, a CSP allowing VitePress's inline scripts by hash and fetches to the downloads origin, `DENY` framing, and `x-robots-tag: noindex` on stages with `noindex`.
 
 ## Commits
