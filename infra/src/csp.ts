@@ -13,6 +13,13 @@ export function inlineScriptHashes(siteDir: string): string[] {
     file.endsWith('.html'),
   );
   if (pages.length === 0) throw new Error(`No pages in ${siteDir}: run pnpm build first`);
+  // VitePress rebuilds functions in its config with `new Function()`, which the CSP blocks.
+  const evals = readdirSync(siteDir, { recursive: true, encoding: 'utf8' }).filter(
+    (file) => file.endsWith('.js') && readFileSync(join(siteDir, file), 'utf8').includes('_vp-fn_'),
+  );
+  if (evals.length > 0) {
+    throw new Error(`${evals.join(', ')} evals a function from the site config; use a string`);
+  }
   const scripts = pages.flatMap((page) =>
     [...readFileSync(join(siteDir, page), 'utf8').matchAll(INLINE_SCRIPT)].map(([, s = '']) => s),
   );

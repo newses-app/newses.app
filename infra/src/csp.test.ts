@@ -24,6 +24,15 @@ describe('siteCsp', () => {
     expect(csp).toContain("frame-ancestors 'none'");
   });
 
+  it('refuses a site whose config carries functions, which the browser would eval', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'site-'));
+    mkdirSync(join(dir, 'assets'));
+    writeFileSync(join(dir, 'index.html'), '<script src="/assets/metadata.js"></script>');
+    writeFileSync(join(dir, 'assets/metadata.js'), 'x("_vp-fn_() => 1")');
+
+    expect(() => siteCsp(dir, [])).toThrow('assets/metadata.js evals a function');
+  });
+
   it('needs a built site', () => {
     expect(() => siteCsp(mkdtempSync(join(tmpdir(), 'site-')), [])).toThrow('pnpm build');
   });

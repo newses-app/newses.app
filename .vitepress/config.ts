@@ -81,7 +81,13 @@ const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
     // page's `lastUpdated: false` only hides the date, leaving an empty footer landmark.
     transformPageData(pageData) {
       if (pageData.frontmatter.lastUpdated === false) delete pageData.lastUpdated;
-      if (!pageData.filePath.startsWith('app-docs/')) return;
+      // The edit link's `:path`, in the repository that owns the page: a pattern function would
+      // reach the browser as code to eval, which the CSP blocks.
+      const pulled = pageData.filePath.startsWith('app-docs/');
+      pageData.filePath = pulled
+        ? `newses/edit/dev/${pageData.filePath.slice('app-docs/'.length)}`
+        : `newses.app/edit/dev/${pageData.filePath}`;
+      if (!pulled) return;
       delete pageData.lastUpdated;
       const adr = adrs.find((a) => a.link === `/${pageData.relativePath.replace(/\.md$/, '')}`);
       pageData.description = adr
@@ -165,13 +171,8 @@ const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
         ],
       },
       socialLinks: [{ icon: 'github', link: 'https://github.com/newses-app/newses' }],
-      editLink: {
-        // Serialized into the client, so it can use nothing outside itself.
-        pattern: ({ filePath }) =>
-          filePath.startsWith('app-docs/')
-            ? `https://github.com/newses-app/newses/edit/dev/${filePath.slice('app-docs/'.length)}`
-            : `https://github.com/newses-app/newses.app/edit/dev/${filePath}`,
-      },
+      // `:path` is the repository and path `transformPageData` sets.
+      editLink: { pattern: 'https://github.com/newses-app/:path' },
     },
   });
 
