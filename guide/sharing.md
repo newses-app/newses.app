@@ -27,3 +27,5 @@ Drag "Publish in Newses" or "Subscribe in Newses" to your browser's bookmarks ba
 "Shared articles" lists every article you share, to open or stop sharing.
 
 Shared pages ask search engines not to index them.
+
+A shared page's own text, such as its date and its link to the original, is in the language of the visitor's browser when Newses has it, else your language, else English. The article stays as it was written. Your published feed's title and description are in your language.

@@ -86,6 +86,14 @@ Settings > Appearance:
 - "Theme": the built-in "Original", "Terminal", and "Sketch", your own, and those others on the server have published.
 - "Adjust this theme": colours, fonts, interface text size, corners, spacing, borders, shadows, and effects, saved as you go. "Save as new theme" keeps them as your own theme, which you can export, import, and publish to everyone on the server.
 
+## Language
+
+Newses is available in English and Spanish. Choose in Settings > Preferences > Language, where each language is listed by its own name. "System default" follows your browser or device: a regional variant such as Mexican Spanish shows Spanish, and a language Newses doesn't have shows English.
+
+Your choice follows your account to your other devices. Sign-in screens use the last language shown on that device. In the desktop app, the tray and menus follow it too.
+
+Articles stay in the language they were written in, and read right to left when their text does.
+
 ## Offline in the browser
 
 Settings > Offline > "Keep articles on this device to read without a connection" keeps unread and starred articles, and those read in the last 7 days, in the browser for reading without a connection. What you read, star, label, or note offline is sent when the connection is back. The [desktop and Android apps](./apps#offline-reading) always do this.
