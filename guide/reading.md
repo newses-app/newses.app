@@ -88,7 +88,7 @@ Settings > Appearance:
 
 ## Language
 
-Newses is available in English and Spanish. Choose in Settings > Preferences > Language, where each language is listed by its own name. "System default" follows your browser or device: a regional variant such as Mexican Spanish shows Spanish, and a language Newses doesn't have shows English.
+Newses is available in English, Spanish, Italian, and German. Choose in Settings > Preferences > Language, where each language is listed by its own name. "System default" follows your browser or device: a regional variant such as Mexican Spanish shows Spanish, and a language Newses doesn't have shows English.
 
 Your choice follows your account to your other devices. Sign-in screens use the last language shown on that device. In the desktop app, the tray and menus follow it too.
 
