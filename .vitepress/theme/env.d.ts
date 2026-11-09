@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 // Vite bundles the theme's stylesheets.
 declare module '*.css';
 

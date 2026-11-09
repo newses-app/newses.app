@@ -6,9 +6,10 @@ import { readAdrs } from './adr.ts';
 const SITE_URL = process.env.SITE_URL ?? 'https://newses.app';
 
 /**
- * The app stage's downloads folder, whose `latest.json` the download page reads: `DOWNLOADS_URL`,
- * else prod's for builds and dev's for `vitepress dev`. The stage allows only the site's own
- * origins to fetch it, so the dev server proxies it.
+ * The app stage's downloads folder, whose `latest.json` and server files the download page and
+ * the self-hosting guides read: `DOWNLOADS_URL`, else prod's for builds and dev's for
+ * `vitepress dev`. The stage allows only the site's own origins to fetch them, so the dev server
+ * proxies the folder.
  */
 function downloads(command: 'build' | 'serve'): NonNullable<UserConfig['vite']> {
   const url = new URL(
@@ -23,7 +24,7 @@ function downloads(command: 'build' | 'serve'): NonNullable<UserConfig['vite']> 
       __DOWNLOADS_URL__: JSON.stringify(url.href),
       __LATEST_JSON_URL__: JSON.stringify(command === 'serve' ? latest : new URL(latest, url).href),
     },
-    server: { proxy: { [latest]: { target: url.origin, changeOrigin: true } } },
+    server: { proxy: { [url.pathname]: { target: url.origin, changeOrigin: true } } },
   };
 }
 

@@ -5,22 +5,30 @@ description: Install, configure, upgrade, back up, and move a Newses server runn
 # Self-hosting with Docker
 
 <!-- #region commands -->
-Commands run from the root of a checkout of [newses-app/newses](https://github.com/newses-app/newses). `C` stands for `docker compose -f docker/compose.yaml`.
+Newses runs from a folder holding a release's `compose.yaml` and its settings in `.env`, on a linux/amd64 or linux/arm64 host with Docker Compose 2.23.1 or later. Commands run in that folder, and `C` stands for `docker compose`. In a checkout ([Building from source](./self-hosting#building-from-source)), commands run from its root, `C` stands for `docker compose -f docker/compose.yaml`, and the settings are in `docker/.env`.
 <!-- #endregion commands -->
 
 ## Install
 
 <!-- #region install -->
-1. `cp docker/.env.example docker/.env`, set `POSTGRES_PASSWORD`, and set `APP_SECRET` to the output of `openssl rand -base64 48`.
-2. Set `ADMIN_LOGIN` and `ADMIN_PASSWORD` for the first admin, or create it with the CLI after step 3.
-3. `C up -d --build`
+1. Download the compose file, and the sample settings as `.env`, into a new folder:
+
+   <ServerInstall part="install" />
+
+2. In `.env`, change `POSTGRES_PASSWORD`, and set `APP_SECRET` to the output of `openssl rand -base64 48`.
+3. Set `ADMIN_LOGIN` and `ADMIN_PASSWORD` for the first admin, or create it with the CLI after step 4.
+4. `C up -d`
 
 `migrate` runs once and exits. `server` and `worker` start after it succeeds. The app listens on `HTTP_PORT` (default 8080): open it in a browser and sign in. `GET /healthz` returns `200` with `{"status":"ok"}` when the database and job queue are reachable.
 <!-- #endregion install -->
 
+The image is signed. To check it with [cosign](https://docs.sigstore.dev/cosign/system_config/installation/):
+
+<ServerInstall part="verify" />
+
 ## Configuration
 
-`docker/.env`:
+`.env`:
 
 | Variable | Default | Purpose |
 |---|---|---|
@@ -51,7 +59,7 @@ Commands run from the root of a checkout of [newses-app/newses](https://github.c
 | `OTEL_METRIC_EXPORT_INTERVAL` | `15000` | Milliseconds between metric exports |
 | `DEPLOYMENT_ENVIRONMENT` | `self-hosted` | `deployment.environment.name` on all telemetry |
 | `GRAFANA_PORT` | `3000` | Port of Grafana on `127.0.0.1` (`observability` profile) |
-| `NEWSES_IMAGE` | `newses:latest` | Image tag to build or run |
+| `NEWSES_IMAGE` | The release's image; in a checkout, `newses:latest` | Image to run; in a checkout, the tag it builds |
 | `COMPOSE_PROJECT_NAME` | `newses` | Prefix of container and volume names; a stack created as `rss-reader` keeps that name to keep its volumes |
 | `VIRTUAL_HOST`, `LETSENCRYPT_HOST` | unset | Public hostname for nginx-proxy and acme-companion (`compose.nginx-proxy.yaml`) |
 | `NGINX_PROXY_NETWORK` | `nginx-proxy` | Existing Docker network of nginx-proxy |
@@ -101,7 +109,7 @@ The worker checks for problems every 5 minutes and emails changes to `ALERT_EMAI
 
 Traces, metrics, and logs:
 
-1. Set `OTEL_EXPORTER_OTLP_ENDPOINT=http://lgtm:4318` in `docker/.env`.
+1. Set `OTEL_EXPORTER_OTLP_ENDPOINT=http://lgtm:4318` in `.env`.
 2. `C --profile observability up -d`
 3. Open `http://127.0.0.1:3000` (on the Docker host; tunnel with `ssh -L 3000:127.0.0.1:3000` from elsewhere). Grafana allows anonymous admin access, so keep it off public interfaces. The `newses` folder has dashboards for the overview, API, jobs, remote sites, and runtime; Explore searches traces (Tempo) and logs (Loki).
 
@@ -109,14 +117,25 @@ Any OTLP/HTTP backend works instead of the bundled one. Telemetry carries route 
 
 ## Upgrade
 
-`git pull && C up -d --build`. Migrations apply before the new server and worker start.
+Download the newer release's compose file over yours, and start it; `.env` stays:
+
+<ServerInstall part="upgrade" />
+
+Add the `--profile` options the stack runs with to `up`. Migrations apply before the new server and worker start. Settings new in the release are in its sample settings ([Download](/download#server)).
+
+In a checkout: `git pull && C up -d --build`.
 
 ## Reverse proxy and TLS
 
 ### nginx-proxy
 
-1. In `docker/.env`, set `VIRTUAL_HOST` (and `LETSENCRYPT_HOST` when acme-companion issues certificates). If nginx-proxy's Docker network is not called `nginx-proxy`, set `NGINX_PROXY_NETWORK`.
-2. Add the override file to every command: `C -f docker/compose.nginx-proxy.yaml up -d`.
+1. In `.env`, set `VIRTUAL_HOST` (and `LETSENCRYPT_HOST` when acme-companion issues certificates). If nginx-proxy's Docker network is not called `nginx-proxy`, set `NGINX_PROXY_NETWORK`.
+2. Download the override, beside `compose.yaml`, and start with both:
+
+   <ServerInstall part="nginx-proxy" />
+
+   In a checkout: `C -f docker/compose.nginx-proxy.yaml up -d`.
+3. From then on, `C` names both files: `docker compose -f compose.yaml -f compose.nginx-proxy.yaml`, in a checkout `docker compose -f docker/compose.yaml -f docker/compose.nginx-proxy.yaml`.
 
 The server then joins the proxy network and is not published on the host. `TRUST_PROXY` defaults to `1`, the proxy being the only hop.
 
@@ -136,7 +155,7 @@ Install the desktop and Android apps from [Download](/download) and enter the se
 
 - Enable nightly dumps with `C --profile backup up -d`. Dumps go to the `backups` volume as `newses-YYYYMMDD-HHMMSS.dump` and are pruned after `BACKUP_RETENTION_DAYS`.
 - Take an ad-hoc dump with `C exec db sh -c 'pg_dump -U "$POSTGRES_USER" -Fc "$POSTGRES_DB"' > newses.dump`.
-- Back up the `blobs` volume too. Favicons and cached images re-fetch, but the archive (`archive/` in the volume) is not in the dumps and cannot be re-fetched. `scripts/export-instance.sh` writes both to one bundle, which `scripts/restore-instance.sh` loads (below).
+- Back up the `blobs` volume too. Favicons and cached images re-fetch, but the archive (`archive/` in the volume) is not in the dumps and cannot be re-fetched. `scripts/export-instance.sh` writes both to one bundle, which `scripts/restore-instance.sh` loads ([Moving to another instance](#moving-to-another-instance)).
 
 ## Restore
 
@@ -145,6 +164,17 @@ Install the desktop and Android apps from [Download](/download) and enter the se
    - From the backups volume: `C exec backup pg_restore --clean --if-exists -d "$POSTGRES_DB" /backups/<file>.dump`
    - From a local file: `C exec -T db sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists' < newses.dump`
 3. `C start server worker`
+
+## Scripts
+
+Exporting, restoring, and importing from TTRSS run scripts that drive Docker from the host, from a checkout of [newses-app/newses](https://github.com/newses-app/newses) at the installed version's tag (the version in `compose.yaml`'s image). Name the install's compose files with `--compose`, once for each:
+
+```sh
+git clone --depth 1 --branch v<version> https://github.com/newses-app/newses newses-scripts
+newses-scripts/scripts/export-instance.sh newses-bundle --compose ~/newses/compose.yaml
+```
+
+A checkout's own stack needs no `--compose`. The scripts warn when the install runs a version other than their checkout's.
 
 ## Moving to another instance
 
@@ -157,4 +187,40 @@ Moves everything to another Docker host or an AWS stage, or from an AWS stage to
 5. Point DNS or the proxy at the target, and set `PUBLIC_URL` there if the address changed.
 6. Delete the bundle.
 
-Everyone signs in again, two-factor authentication included; the apps need the new address if it changed. `COMPOSE_PROJECT_NAME` and `COMPOSE_ENV_FILES` select a stack other than `docker/`'s.
+Everyone signs in again, two-factor authentication included; the apps need the new address if it changed.
+
+## Building from source
+
+A checkout builds the image itself:
+
+```sh
+git clone https://github.com/newses-app/newses
+cd newses
+cp docker/.env.example docker/.env
+```
+
+Then follow [Install](#install) from step 2, in `docker/.env`, and start with `C up -d --build`.
+
+### Moving a checkout's stack to the published image
+
+The release's compose file has the checkout's project name (`newses`, or `COMPOSE_PROJECT_NAME`) and volumes, so the stack keeps its data. The release must be the checkout's version or newer.
+
+1. Download the files as in [Install](#install) step 1, then copy the checkout's `docker/.env` over `.env`, and remove `NEWSES_IMAGE` from it if set.
+2. In the checkout: `docker compose -f docker/compose.yaml down`. The volumes stay.
+3. In the new folder: `docker compose up -d`, with the `--profile` options the stack ran with.
+
+## Without Compose
+
+Platforms that run containers without Compose (Kubernetes, Unraid, Portainer without a stack) run the release's image:
+
+<ServerInstall part="image" />
+
+Each role is the container's command, with the [settings](#configuration) as environment variables, the same `APP_SECRET` in each, and `DATABASE_URL` pointing at PostgreSQL (the compose file runs version 18):
+
+| Role | Runs | Volume | Health check |
+|---|---|---|---|
+| `migrate` | Applies migrations and exits; before `server` and `worker` start, at install and after each upgrade | — | — |
+| `server` | The web app and API, on port 8080 | `/data/blobs` | `wget -qO- http://127.0.0.1:8080/healthz` |
+| `worker` | Feed fetches and scheduled tasks | `/data/blobs`, the same volume as `server` | `newses worker-health` |
+
+The containers run as user `node` (UID 1000), which must be able to write `/data/blobs`. `cli` runs the [user commands](#users).

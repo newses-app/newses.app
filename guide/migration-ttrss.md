@@ -34,15 +34,16 @@ Behaviour:
    ```
    docker compose exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" -Fc "$POSTGRES_DB"' > ttrss.dump
    ```
-2. Copy the dump to a machine with a checkout of [newses-app/newses](https://github.com/newses-app/newses) and Docker running.
-3. From that checkout's root, import into the running Docker stack in `docker/`, or into an AWS stage:
+2. Copy the dump to the Newses install's Docker host, or for an AWS stage to any machine with Docker running, with a checkout of the scripts ([Scripts](./self-hosting#scripts)).
+3. Import into the running Docker install, or into an AWS stage:
    ```
-   scripts/import-ttrss.sh ttrss.dump
-   scripts/import-ttrss.sh ttrss.dump --aws dev
+   newses-scripts/scripts/import-ttrss.sh ttrss.dump --compose ~/newses/compose.yaml
+   newses-scripts/scripts/import-ttrss.sh ttrss.dump --aws dev
    ```
 
 | Option | Effect |
 |---|---|
+| `--compose FILE` | The Docker install's compose file, once for each; a checkout's own stack needs none |
 | `--aws dev\|prod` | Import into that stage's database, with the caller's AWS credentials (`AWS_PROFILE`), in the region of `infra/deploy.config.json` |
 | `--users`, `--since`, `--force` | Passed to the CLI |
 | `--dry-run` | Stop after the dry run |

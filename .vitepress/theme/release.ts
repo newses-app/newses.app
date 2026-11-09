@@ -17,6 +17,17 @@ export interface ReleaseManifest {
   windows: { installer: ReleaseFile; zip: ReleaseFile; portable?: ReleaseFile };
   linux: { appImage: ReleaseFile; deb: ReleaseFile };
   android: ReleaseFile & { versionCode: number };
+  /** Releases from stages that publish the server image. */
+  server?: ServerRelease;
+}
+
+/** The server image and the files that run it with Docker Compose. */
+export interface ServerRelease {
+  image: { repository: string; tag: string; digest: string };
+  compose: ReleaseFile;
+  env: ReleaseFile;
+  nginxProxy: ReleaseFile;
+  publicKey: ReleaseFile;
 }
 
 export type Platform = 'windows' | 'linux' | 'android';
@@ -55,3 +66,52 @@ export function platformOf(userAgent: string): Platform | undefined {
 export const fileName = (url: string) => url.slice(url.lastIndexOf('/') + 1);
 
 export const formatSize = (bytes: number) => `${(bytes / 1_000_000).toFixed(1)} MB`;
+
+/** The names the server's files are saved as, in the install's folder. */
+export const SERVER_FILES = {
+  compose: 'compose.yaml',
+  env: '.env',
+  nginxProxy: 'compose.nginx-proxy.yaml',
+  publicKey: 'cosign.pub',
+} as const;
+
+const fetchAndCheck = (file: ReleaseFile, as: string) => [
+  `curl -fL -o ${as} ${file.url}`,
+  `echo '${file.sha256}  ${as}' | sha256sum -c`,
+];
+
+/** The server's commands, as the downloads page gives them. */
+export function serverCommands(server: ServerRelease) {
+  const { repository, tag, digest } = server.image;
+  return {
+    install: [
+      'mkdir newses && cd newses',
+      ...fetchAndCheck(server.compose, SERVER_FILES.compose),
+      ...fetchAndCheck(server.env, SERVER_FILES.env),
+    ],
+    upgrade: [...fetchAndCheck(server.compose, SERVER_FILES.compose), 'docker compose up -d'],
+    nginxProxy: [
+      ...fetchAndCheck(server.nginxProxy, SERVER_FILES.nginxProxy),
+      `docker compose -f ${SERVER_FILES.compose} -f ${SERVER_FILES.nginxProxy} up -d`,
+    ],
+    verify: [
+      ...fetchAndCheck(server.publicKey, SERVER_FILES.publicKey),
+      `cosign verify --key ${SERVER_FILES.publicKey} ${repository}:${tag}`,
+    ],
+    image: [`docker pull ${repository}:${tag}`, `docker pull ${repository}@${digest}`],
+  };
+}
+
+/** The server's files for the download page, the compose file first. */
+export const serverFiles = (server: ServerRelease) => [
+  { label: 'Compose file', file: server.compose },
+  { label: 'Sample settings', file: server.env },
+  { label: 'nginx-proxy override', file: server.nginxProxy },
+  { label: 'Image signing key', file: server.publicKey },
+];
+
+/** The SHA-256 of a text, in hex, as `latest.json` gives files'. */
+export async function sha256(text: string) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+}

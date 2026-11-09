@@ -1,6 +1,6 @@
 ---
 title: Download
-description: The Newses desktop apps for Windows and Linux, and the Android app.
+description: The Newses desktop apps for Windows and Linux, the Android app, and the server's Docker Compose files.
 # No page footer (date, edit link, previous and next): the downloads come from the release, and
 # beside the site's footer it would be a second contentinfo landmark.
 lastUpdated: false
@@ -15,6 +15,6 @@ import DownloadList from './.vitepress/theme/components/DownloadList.vue';
 
 # Download
 
-The desktop apps for Windows and Linux and the Android app, from the latest release. They connect to a Newses server you run or have an account on.
+The desktop apps for Windows and Linux and the Android app, from the latest release. They connect to a Newses server you run or have an account on. The files that run the server follow them.
 
 <DownloadList />

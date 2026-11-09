@@ -4,14 +4,7 @@ description: Run Newses with Docker, sign in, and subscribe to your first feed.
 
 # Getting started
 
-Newses runs on any machine with Docker and Git.
-
-## Get the code
-
-```sh
-git clone https://github.com/newses-app/newses
-cd newses
-```
+Newses runs on any machine with Docker.
 
 <!--@include: ./self-hosting.md#commands-->
 

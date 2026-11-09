@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { VPBadge, VPButton } from 'vitepress/theme';
+import { latestRelease } from '../latest.ts';
 import {
   fileName,
   formatSize,
@@ -8,6 +9,7 @@ import {
   type Platform,
   platformOf,
   type ReleaseManifest,
+  serverFiles,
 } from '../release.ts';
 
 // The page is rendered without the release, so it never needs rebuilding for one; without
@@ -18,6 +20,7 @@ const failed = ref(false);
 const platform = ref<Platform>();
 
 const files = computed(() => (manifest.value ? installers(manifest.value) : []));
+const server = computed(() => (manifest.value?.server ? serverFiles(manifest.value.server) : []));
 const recommended = computed(() => files.value.find((i) => i.platform === platform.value));
 const checksums = computed(() =>
   manifest.value ? new URL(`${manifest.value.version}/SHA256SUMS`, downloads).href : '',
@@ -31,9 +34,7 @@ const published = computed(() =>
 onMounted(async () => {
   platform.value = platformOf(navigator.userAgent);
   try {
-    const response = await fetch(__LATEST_JSON_URL__, { cache: 'no-cache' });
-    if (!response.ok) throw new Error(`latest.json: ${String(response.status)}`);
-    manifest.value = (await response.json()) as ReleaseManifest;
+    manifest.value = await latestRelease();
   } catch {
     failed.value = true;
   }
@@ -78,6 +79,30 @@ onMounted(async () => {
           </tr>
         </tbody>
       </table>
+      <template v-if="server.length > 0">
+        <h2 id="server">Server</h2>
+        <p>
+          The files that run the server with Docker Compose, on linux/amd64 and linux/arm64: install
+          it with <a href="/guide/self-hosting#install">Self-hosting</a>.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Server file</th>
+              <th>File and SHA-256</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in server" :key="item.file.url">
+              <td>{{ item.label }}</td>
+              <td>
+                <a :href="item.file.url">{{ fileName(item.file.url) }}</a>
+                <code class="sha256">{{ item.file.sha256 }}</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </template>
       <p>
         Checksums of every file:
         <a :href="checksums">SHA256SUMS</a>.

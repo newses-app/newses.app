@@ -11,8 +11,8 @@ The Newses project site at `newses.app`: landing page, user guides, contributor 
 | `pnpm check` | Lint, typecheck, format check, tests (run before every commit) |
 | `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm format` | Individual steps |
 | `pnpm docs:pull` | Copies `docs/architecture.md`, `docs/adr/`, and `AGENTS.md` from the app repository into `app-docs/`: from the checkout at `NEWSES_APP_DIR` when set, otherwise a sparse clone of `NEWSES_APP_BRANCH` (default `dev`) with your git credentials |
-| `NEWSES_APP_DIR=../newses pnpm dev` | Site with hot reload on `localhost:5173`, after `docs:pull`; the download page reads the dev stage's `latest.json` (or `DOWNLOADS_URL`'s) through the dev server's proxy |
-| `NEWSES_APP_DIR=../newses pnpm build` | Static site in `.vitepress/dist`, after `docs:pull`; fails on dead internal links. `SITE_URL` (default `https://newses.app`) sets the sitemap's origin, `DOWNLOADS_URL` (default `https://reader.newses.app/downloads/`) the app stage the download page reads |
+| `NEWSES_APP_DIR=../newses pnpm dev` | Site with hot reload on `localhost:5173`, after `docs:pull`; the download page and the self-hosting guides read the dev stage's downloads (or `DOWNLOADS_URL`'s) through the dev server's proxy |
+| `NEWSES_APP_DIR=../newses pnpm build` | Static site in `.vitepress/dist`, after `docs:pull`; fails on dead internal links. `SITE_URL` (default `https://newses.app`) sets the sitemap's origin, `DOWNLOADS_URL` (default `https://reader.newses.app/downloads/`) the app stage the download page and the self-hosting guides read |
 | `pnpm preview` | Serves the last build |
 | `pnpm screenshots` | Captures the app's reader, an article, filters, and settings in light and dark, on desktop and phone, as WebP in `public/screenshots/` for the home page; signs in to `E2E_BASE_URL` as `E2E_LOGIN` with `E2E_PASSWORD` (from the environment or the gitignored `screenshots.env`) with an account subscribed only to public feeds. Needs `pnpm exec playwright install chromium` once; not part of `pnpm check` |
 | `pnpm social-card` | Draws `public/social-card.png`, the link preview image every page names in its Open Graph tags, beside the light reader screenshot; rerun after `pnpm screenshots` |
@@ -27,6 +27,7 @@ The Newses project site at `newses.app`: landing page, user guides, contributor 
 - Node runs `.ts` directly: erasable syntax only (no enums, namespaces, parameter properties); relative imports use the `.ts` extension.
 - Tests live next to code as `*.test.ts` (Vitest).
 - `app-docs/` is generated; never edit it. Pulled pages are served under `/contributing/` by `rewrites` in `.vitepress/config.ts`, and the ADR sidebar is generated from their titles (`.vitepress/adr.ts`).
+- `ServerInstall.vue` shows a step of installing the server with the latest release's commands and files, read in the browser like the download page's; without scripts it links the downloads page. It is registered globally, as the self-hosting guide's regions are included in other pages.
 - Mermaid fences render as diagrams in the browser (`MermaidDiagram.vue`, mermaid loaded only on pages that have one); without scripts, their source shows.
 - `HomeMain.vue` and `SiteNotFound.vue` replace the default theme's home and 404 components (aliases in `.vitepress/config.ts`), so those pages have a main landmark.
 - The site publishes only the project, and self-hosters never reuse it, so it may hardcode the project's URLs (`newses.app`, the app stages, the GitHub repositories). The app repository's rule against hardcoded URLs doesn't apply here; account-specific values for the CDK app still come from `infra/deploy.config.json`.
@@ -49,7 +50,7 @@ The Newses project site at `newses.app`: landing page, user guides, contributor 
 |---|---|
 | `index.md` | The home page: hero, features, screenshots (`HomeScreenshots.vue`, shown once `pnpm screenshots` has written them), coming from Tiny Tiny RSS |
 | `guide/getting-started.md` | Docker quickstart to the first feed; includes `self-hosting.md`'s `#commands` and `#install` regions |
-| `guide/self-hosting.md` | Operating a Docker deployment: install, configuration, users, logs, monitoring, upgrade, proxy, backup, restore, moving |
+| `guide/self-hosting.md` | Operating a Docker deployment: install, configuration, users, logs, monitoring, upgrade, proxy, backup, restore, scripts, moving, building from source, running without Compose |
 | `guide/migration-ttrss.md` | Importing data from an existing TTRSS instance |
 | `guide/reading.md` | Sidebar and special feeds, the article list, article actions, full text, images, the archive, appearance, offline in the browser |
 | `guide/feeds.md` | Subscribing, OPML, categories, per-feed options |
@@ -60,7 +61,7 @@ The Newses project site at `newses.app`: landing page, user guides, contributor 
 | `guide/apps.md` | Desktop and Android apps: install, connect, profiles, updates, offline, desktop options, data |
 | `guide/clients.md` | TTRSS and Google Reader clients: app passwords, server URLs, known clients, what carries over |
 | `guide/faq.md` | Short answers that link to the page owning each fact |
-| `download.md` | The latest release's installers, read from the app stage's `latest.json` in the browser |
+| `download.md` | The latest release's installers and server files, read from the app stage's `latest.json` in the browser |
 | `contributing/index.md` | Development setup; the commands and code conventions are included from the app's `AGENTS.md` regions (`#commands`, `#conventions`) |
 | `contributing/adr/index.md` | The ADR index, generated from the pulled ADRs (`.vitepress/adr.data.ts`) |
 | `/contributing/` (pulled) | Architecture and ADRs, owned by the app repository; change them there |
