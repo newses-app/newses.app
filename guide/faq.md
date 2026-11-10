@@ -36,6 +36,10 @@ Yes, after a time the server sets, which you can change in Settings > Preference
 
 Use one of your recovery codes at the code prompt. Without them, an admin can [turn two-factor sign-in off](./account#two-factor-sign-in) for you.
 
+## Where is the source code, and whose work does Newses use?
+
+Settings > "About", or "About Newses" on the sign-in page, links the source code of the app and of your server, credits the fonts, icons, palettes, and data Newses builds on, and lists every package the app and the server include, with its licence. Newses is licensed under the GNU AGPL, version 3 or later.
+
 ## How do I move Newses to another server?
 
 See [Moving to another instance](./self-hosting#moving-to-another-instance).

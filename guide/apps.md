@@ -40,7 +40,7 @@ Each server and user is a profile, named after the server's `INSTANCE_NAME` or h
 | Portable exe, zip, deb | "Download" opens the downloads page; install the new version yourself |
 | Android | At launch, at most once a day, offers the new version; "Download" opens the APK, and you confirm the install |
 
-Desktop apps check at launch and every 6 hours. Settings > Account > "App" shows the version and has "Check for updates".
+Desktop apps check at launch and every 6 hours. Settings > "About" shows the version and has "Check for updates".
 
 ## Offline reading
 
@@ -56,6 +56,8 @@ Settings > Account > "App":
 - "Notify me about new entries while the app is in the background": one notification, updated at most every 15 minutes, opens the feed or category you click.
 - "Keep running in the tray when the window is closed": the tray menu opens the app, checks for new entries, and switches profiles.
 - "Start when I sign in to my computer" (not in the portable exe).
+
+Help > "About Newses" opens Settings > "About"; Help > "Chromium Licences" shows the licences of the browser engine the app runs on.
 
 On Android, sharing a link to Newses offers to subscribe to it or publish it.
 
