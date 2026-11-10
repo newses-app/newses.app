@@ -83,7 +83,7 @@ Old articles are deleted after a time the server sets, unless starred, published
 
 Settings > Appearance:
 - "Mode": "Follow system" (default), "Light", or "Dark".
-- "Theme": the built-in "Original", "Terminal", "Sketch", "Catppuccin", "Solarized", "Amber monitor", "E-ink", and "Synthwave", your own, and those others on the server have published.
+- "Theme": the built-in "Original", "Terminal", "Sketch", "Catppuccin", "Solarized", "Amber monitor", "E-ink", "Synthwave", "Gruvbox", "Noir", and "Saul", your own, and those others on the server have published.
 - "Adjust this theme": colours, fonts, interface text size, corners, spacing, borders, shadows, and effects, saved as you go. "Save as new theme" keeps them as your own theme, which you can export, import, and publish to everyone on the server.
 
 ## Language
