@@ -63,6 +63,11 @@ The image is signed. To check it with [cosign](https://docs.sigstore.dev/cosign/
 | `NEWSES_IMAGE` | The release's image; in a checkout, `newses:latest` | Image to run; in a checkout, the tag it builds |
 | `COMPOSE_PROJECT_NAME` | `newses` | Prefix of container and volume names; a stack created as `rss-reader` keeps that name to keep its volumes |
 | `VIRTUAL_HOST`, `LETSENCRYPT_HOST` | unset | Public hostname for nginx-proxy and acme-companion (`compose.nginx-proxy.yaml`) |
+| `COMPOSE_PROFILES` | unset | Optional services to run, comma-separated: `ntfy` ([Push to Android](#push-to-android)), `backup`, `observability` |
+| `NTFY_HOST` | unset | Hostname of the bundled ntfy (`ntfy` profile), e.g. `ntfy.example.com`; the Android app suggests it, and the server reaches it even on a private address |
+| `NTFY_PORT` | `8081` | Host port the bundled ntfy is published on, for your proxy |
+| `NTFY_AUTH_ACCESS` | `*:up*:wo` | The bundled ntfy's access for everyone: `*:up*:deny` lets only users given access publish ([Push to Android](#push-to-android)) |
+| `PUSH_TOKENS` | unset | ntfy access tokens the server publishes with, comma-separated `host=token` pairs, for a ntfy that only lets users publish |
 | `NGINX_PROXY_NETWORK` | `nginx-proxy` | Existing Docker network of nginx-proxy |
 
 Application variables, set in `compose.yaml`:
@@ -72,6 +77,8 @@ Application variables, set in `compose.yaml`:
 | `DATABASE_URL` | — | PostgreSQL connection URL |
 | `HOST`, `PORT` | `0.0.0.0`, `8080` | Server bind address inside the container |
 | `BLOB_DIR` | `/data/blobs` | Favicon and image cache, and the archive (`blobs` volume) |
+| `PUSH_DISTRIBUTOR_URL` | `https://` and `NTFY_HOST` | UnifiedPush distributor the Android app suggests to readers |
+| `PUSH_TRUSTED_HOSTS` | `NTFY_HOST` | Comma-separated hosts whose push endpoints may be on private addresses, without allowing feeds there |
 
 ## Users
 
@@ -147,6 +154,38 @@ Forward to the server's port 8080 and pass `X-Forwarded-For` and `X-Forwarded-Pr
 The desktop and mobile apps need HTTPS. The proxy must forward the `Authorization` and `Origin` headers and `OPTIONS` requests, which carry the apps' bearer tokens and CORS preflights.
 
 `/api/v1/events` is a long-lived event stream. nginx and nginx-proxy need no extra configuration. Other proxies must not buffer its responses and must allow at least 30 s between bytes (the server sends a heartbeat every 25 s).
+
+The bundled ntfy needs its own virtual host for `NTFY_HOST`, forwarding to `NTFY_PORT` with WebSocket upgrades and the same long-lived connections (it sends a keepalive every 45 s), and `X-Forwarded-For`.
+
+## Push to Android
+
+The server pushes new entries to the Android app through the reader's [UnifiedPush](https://unifiedpush.org) distributor, so it syncs within minutes even while closed; without one it syncs every 30 minutes. Readers can use the public ntfy.sh, or a ntfy you run beside Newses:
+
+1. Give ntfy its own hostname, such as `ntfy.example.com` beside `reader.example.com`, with a DNS record pointing at the server (a wildcard record covers it). ntfy does not run under a path of the reader's address.
+2. In `.env`, set `NTFY_HOST` and add `ntfy` to `COMPOSE_PROFILES`, then `C up -d`.
+3. Route `NTFY_HOST` to it over HTTPS: nginx-proxy does with the override ([nginx-proxy](#nginx-proxy)); other proxies forward it to `NTFY_PORT` ([Other proxies](#other-proxies)).
+4. Give each reader an ntfy user that can read UnifiedPush topics, and tell them its name and password:
+
+   ```sh
+   C exec ntfy ntfy user add <name>
+   C exec ntfy ntfy access <name> 'up*' read-only
+   ```
+
+Anyone can publish to `up*` topics, as servers push there; reading them, and every other topic, needs a user. Its users and messages are in the `ntfy` volume. Readers then set up the app ([Push on Android](./apps#push-on-android)).
+
+To let only Newses publish there, give it a user of its own with a token:
+
+1. Create the user, let it publish to UnifiedPush topics, and make its token:
+
+   ```sh
+   C exec ntfy ntfy user add newses
+   C exec ntfy ntfy access newses 'up*' write-only
+   C exec ntfy ntfy token add newses
+   ```
+
+2. In `.env`, set `PUSH_TOKENS=ntfy.example.com=tk_…` (your `NTFY_HOST` and the token) and `NTFY_AUTH_ACCESS=*:up*:deny`, then `C up -d`.
+
+Other apps' servers can then no longer push to readers through it.
 
 ## Apps
 

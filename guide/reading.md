@@ -99,3 +99,7 @@ Articles stay in the language they were written in, and read right to left when 
 Settings > Offline > "Keep articles on this device to read without a connection" keeps unread and starred articles, and those read in the last 7 days, in the browser for reading without a connection. What you read, star, label, or note offline is sent when the connection is back. The [desktop and Android apps](./apps#offline-reading) always do this.
 
 Safari deletes kept articles after 7 days without a visit; adding Newses to the Home Screen keeps them.
+
+## Notifications in the browser
+
+Settings > Account > "Notifications" > "Notify me about new entries on this device" shows one notification with the running total of new articles, at most every 30 minutes, also while Newses is closed; clicking it opens the feed or category. It is set per browser and per account, and the browser asks to allow notifications first. It needs Newses over HTTPS. On iPhone and iPad, add Newses to the Home Screen, open it from there, and turn it on there.

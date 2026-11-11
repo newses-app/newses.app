@@ -46,14 +46,32 @@ Desktop apps check at launch and every 6 hours. Settings > "About" shows the ver
 
 The apps always keep articles for reading offline: unread and starred articles with their text and images, and those read in the last 7 days, within a storage limit. Offline, everything you read, star, label, or note is sent when the server is back; filters, sharing, full text, and account settings need the server.
 
-Settings > "Offline" sets how many unread articles to keep, the storage limit, and whether to download images. On Android, it can also keep images to Wi-Fi and sync about every 30 minutes while the app is closed.
+Settings > "Offline" sets how many unread articles to keep, the storage limit, and whether to download images. On Android, it can also keep images to Wi-Fi and sync while the app is closed: about every 30 minutes, or as the server finds new articles with push.
+
+### Push on Android
+
+With a UnifiedPush distributor app, the server tells the Android app when it has new articles for you, and the app syncs within minutes even while closed:
+
+1. Install [ntfy](https://ntfy.sh) from Google Play or F-Droid.
+2. If your server runs its own ntfy (Settings > "Offline" names it), add that server in ntfy's settings as the default server, with the user and password your admin gives you. Otherwise ntfy uses ntfy.sh, and needs nothing more.
+3. In Newses, turn on Settings > "Offline" > "Sync while the app is closed". It registers with ntfy, and says when pushes arrive through it; with several distributors installed, "Choose push service" picks one.
+
+On ntfy.sh, pushes count against the phone that receives them, within ntfy.sh's free limits. With a paid ntfy.sh account, sign in to it in ntfy's settings so they count against your account's.
+
+When ntfy holds its own connection (to your server's ntfy, or in the F-Droid version), it keeps a "listening" notification showing, which you can hide in Android's settings for that notification. Without a distributor, or when it stops, the app syncs every 30 minutes again.
+
+## Notifications
+
+Settings > Account > "Notifications":
+- Desktop: "Notify me about new entries while the app is in the background": one notification, updated at most every 15 minutes, opens the feed or category you click.
+- Android: "Notify me about new entries while the app is closed", once "Sync while the app is closed" is on: one notification with the running total of what the sync found, which opens the feed or category you tap, and goes once you open the app. Android asks to allow notifications first.
+- In a browser: "Notify me about new entries on this device" ([Notifications in the browser](./reading#notifications-in-the-browser)).
 
 Offline articles are stored unencrypted on the device. Signing out deletes them, and asks first if changes are still waiting to be sent.
 
 ## Desktop extras
 
 Settings > Account > "App":
-- "Notify me about new entries while the app is in the background": one notification, updated at most every 15 minutes, opens the feed or category you click.
 - "Keep running in the tray when the window is closed": the tray menu opens the app, checks for new entries, and switches profiles.
 - "Start when I sign in to my computer" (not in the portable exe).
 
