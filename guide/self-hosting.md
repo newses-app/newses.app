@@ -33,7 +33,7 @@ The image is signed. To check it with [cosign](https://docs.sigstore.dev/cosign/
 | Variable | Default | Purpose |
 |---|---|---|
 | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | — | Database credentials; also used to build `DATABASE_URL` |
-| `APP_SECRET` | — | At least 32 characters; keys for encrypting stored 2FA secrets and feed passwords and for signing tokens. Back it up with the database: changing or losing it disables 2FA for every user and clears feed passwords |
+| `APP_SECRET` | — | At least 32 characters; keys for encrypting stored 2FA secrets and feed passwords and for signing tokens. Back it up with the database: changing or losing it disables 2FA for every user, and feeds with a login stop updating until their readers enter the password again |
 | `HTTP_PORT` | `8080` | Host port for the server |
 | `LOG_LEVEL` | `info` | `trace`, `debug`, `info`, `warn`, `error`, `fatal`; `debug` and `trace` log request, feed, page, and image URLs (secret keys stay redacted), which reach OTLP too when it is on |
 | `PUBLIC_URL` | unset | The address readers use, e.g. `https://reader.example.com`; makes published-feed links absolute. Unset uses each request's address, which needs a proxy that forwards `Host` |
@@ -227,7 +227,7 @@ Moves everything to another Docker host or an AWS stage, or from an AWS stage to
 5. Point DNS or the proxy at the target, and set `PUBLIC_URL` there if the address changed.
 6. Delete the bundle.
 
-Everyone signs in again, two-factor authentication included; the apps need the new address if it changed.
+Everyone signs in again, two-factor authentication included; the apps need the new address if it changed. Feed passwords move with the bundle.
 
 ## Building from source
 

@@ -12,6 +12,14 @@ Newses reads RSS, Atom, RDF, and JSON Feed.
 
 Each feed is checked once for everyone on the server who follows it, so a popular feed can be checked more often than you set.
 
+### Feeds that need a login
+
+For a feed behind a login (HTTP Basic authentication), tick "This feed needs a login" and enter its "Login" and "Password"; the box is ticked for you when the feed says it needs one. The login is sent only to the feed's own site, and the password is stored encrypted and never shown again. A feed with a login is checked for you alone. Its articles are never kept in the [archive](./reading#the-archive).
+
+"Edit feed" changes the login, keeping the saved password when "Password" is left empty, or removes it by unticking the box. New details are tried before they are saved. Adding or removing a login brings the feed's articles in again as new; starred and published ones are kept.
+
+Third-party apps using the TTRSS API can subscribe with a login too. Logins need a connection: they are never kept on the device to send later.
+
 ## Import and export
 
 Settings > Feeds:
