@@ -30,9 +30,9 @@ The toolbar above the list:
 
 | Control | Does |
 |---|---|
-| "Search" | Searches the open feed's titles, text, and your notes, best matches first |
+| "Search" | Searches the open feed's titles, text, and your notes, best matches first; see [Search](#search) |
 | "Show" | "Unread, or all when none" (default), "All articles", or "Unread only" |
-| "Sort" | "Newest first" (default), "Oldest first", or "By title"; search results are always by relevance |
+| "Sort" | "Newest first" (default), "Oldest first", or "By title"; searches with words are by relevance |
 | Layout | "Three panes" (list and article side by side) or "Combined (expanded articles)" |
 | "Mark as read" | Catches up on the open feed: "All articles", or those "Older than one day", "Older than 7 days", or "Older than 14 days" |
 | "Update now" | Asks the server to check the feed now |
@@ -46,6 +46,25 @@ Settings > Preferences sets the defaults for "Show", "Sort", and the layout, and
 - "In the combined layout, mark articles read as they scroll past" (off).
 - "Hide feeds without unread articles" (off).
 - "Ask before marking many articles read" (on).
+
+## Search
+
+Words find the articles with all of them in the title, the text, or your note. Operators narrow a search, alone or with words:
+
+| Write | Finds |
+|---|---|
+| `"two words"` | The words together |
+| `cake OR pie` | Either word |
+| `-word` | Articles without the word |
+| `title:text`, `author:text`, `note:text` | Articles whose title, author, or note contains the text |
+| `tag:name`, `label:name` | Articles with that tag or label; quote names with spaces: `label:"Read later"` |
+| `note:true`, `note:false` | Articles with a note, or without one |
+| `unread:true`, `star:true`, `pub:true` | Unread, starred, or published articles; `false` for the others |
+| `@2024-05-01`, `@today`, `@yesterday`, `@-3days`, `@-2weeks` | Articles of that day, in your time zone |
+
+A `-` before an operator turns it round: `-tag:recipes` finds the articles without that tag. Operators are in English in every language. A search of operators alone lists the newest first. They are Tiny Tiny RSS's operators, so its [apps](./clients) can use them too, with days in UTC.
+
+Without a connection, search covers the articles on the device. In [the archive](#the-archive), past articles have no stars, notes, tags, labels, or unread state, so operators asking for them find nothing.
 
 ## Articles
 
