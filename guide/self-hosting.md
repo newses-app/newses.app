@@ -255,7 +255,7 @@ Platforms that run containers without Compose (Kubernetes, Unraid, Portainer wit
 
 <ServerInstall part="image" />
 
-Each role is the container's command, with the [settings](#configuration) as environment variables, the same `APP_SECRET` in each, and `DATABASE_URL` pointing at PostgreSQL (the compose file runs version 18):
+Each role is the container's command, with the [settings](#configuration) as environment variables, the same `APP_SECRET` in each, and `DATABASE_URL` pointing at PostgreSQL (the compose file runs version 18) with the `unaccent` extension available, as it is wherever PostgreSQL's contrib modules are installed:
 
 | Role | Runs | Volume | Health check |
 |---|---|---|---|

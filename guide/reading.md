@@ -49,7 +49,7 @@ Settings > Preferences sets the defaults for "Show", "Sort", and the layout, and
 
 ## Search
 
-Words find the articles with all of them in the title, the text, or your note. Operators narrow a search, alone or with words:
+Words find the articles with all of them in the title, the text, or your note, whatever their accents: `cafe` finds "café". In articles in a language with a stemmer, such as English, Spanish, Italian, or German, words find their other forms too: `song` finds "songs", `cancion` finds "canciones". Words are matched in the languages of your feeds and of Newses. Notes and the archive's older articles match accents only, not other forms. Operators narrow a search, alone or with words:
 
 | Write | Finds |
 |---|---|
