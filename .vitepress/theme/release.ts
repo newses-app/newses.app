@@ -13,10 +13,13 @@ export interface ReleaseManifest {
   prerelease: boolean;
   /** ISO 8601 time of publishing. */
   published: string;
-  /** Releases before 0.3.4 have no portable exe. */
-  windows: { installer: ReleaseFile; zip: ReleaseFile; portable?: ReleaseFile };
-  linux: { appImage: ReleaseFile; deb: ReleaseFile };
-  android: ReleaseFile & { versionCode: number };
+  /**
+   * Each platform when the release built it: the project's stages build all three, a Docker
+   * install's apps build Linux and Android. Releases before 0.3.4 have no portable exe.
+   */
+  windows?: { installer: ReleaseFile; zip: ReleaseFile; portable?: ReleaseFile };
+  linux?: { appImage: ReleaseFile; deb: ReleaseFile };
+  android?: ReleaseFile & { versionCode: number };
   /** Releases from stages that publish the server image. */
   server?: ServerRelease;
 }
@@ -41,17 +44,16 @@ export interface Installer {
 /** Every installer in the release, each platform's recommended one first. */
 export function installers(manifest: ReleaseManifest): Installer[] {
   const { windows, linux, android } = manifest;
-  return [
-    { platform: 'windows' as const, label: 'Windows installer', file: windows.installer },
-    ...(windows.portable
-      ? [{ platform: 'windows' as const, label: 'Windows portable', file: windows.portable }]
-      : []),
-    { platform: 'windows' as const, label: 'Windows zip', file: windows.zip },
+  const all: (Omit<Installer, 'file'> & { file: ReleaseFile | undefined })[] = [
+    { platform: 'windows', label: 'Windows installer', file: windows?.installer },
+    { platform: 'windows', label: 'Windows portable', file: windows?.portable },
+    { platform: 'windows', label: 'Windows zip', file: windows?.zip },
     // AppArmor stops the AppImage's sandbox on Ubuntu 24.04 and later.
-    { platform: 'linux' as const, label: 'Linux deb', file: linux.deb },
-    { platform: 'linux' as const, label: 'Linux AppImage', file: linux.appImage },
-    { platform: 'android' as const, label: 'Android APK', file: android },
+    { platform: 'linux', label: 'Linux deb', file: linux?.deb },
+    { platform: 'linux', label: 'Linux AppImage', file: linux?.appImage },
+    { platform: 'android', label: 'Android APK', file: android },
   ];
+  return all.filter((installer): installer is Installer => installer.file !== undefined);
 }
 
 /** The platform a browser runs on, if Newses has an app for it. */

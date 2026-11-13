@@ -8,7 +8,7 @@ The apps connect to any Newses server over HTTPS, keep articles for reading offl
 
 ## Install
 
-Get them from [Download](/download), which also lists each file's SHA-256.
+Get them from [Download](/download), which also lists each file's SHA-256, or from your server's own downloads at `https://<your server>/downloads/` when it offers them ([Your own app downloads](./self-hosting#your-own-app-downloads)): the Linux and Android apps from there update from your server.
 
 | Platform | File | Notes |
 |---|---|---|

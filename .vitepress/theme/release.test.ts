@@ -18,17 +18,19 @@ const file = (name: string): ReleaseFile => ({
   sha256: 'ab'.repeat(32),
 });
 
+const windows = {
+  installer: file('newses-1.2.3-windows-setup.exe'),
+  zip: file('newses-1.2.3-windows-x64.zip'),
+  portable: file('newses-1.2.3-windows-portable.exe'),
+};
+const android = { ...file('newses-1.2.3.apk'), versionCode: 1020399 };
 const manifest: ReleaseManifest = {
   version: '1.2.3',
   prerelease: false,
   published: '2026-10-20T02:18:39.235Z',
-  windows: {
-    installer: file('newses-1.2.3-windows-setup.exe'),
-    zip: file('newses-1.2.3-windows-x64.zip'),
-    portable: file('newses-1.2.3-windows-portable.exe'),
-  },
+  windows,
   linux: { appImage: file('newses-1.2.3-linux.AppImage'), deb: file('newses-1.2.3-linux.deb') },
-  android: { ...file('newses-1.2.3.apk'), versionCode: 1020399 },
+  android,
 };
 
 describe('installers', () => {
@@ -44,10 +46,19 @@ describe('installers', () => {
   });
 
   it('leaves out the portable exe of releases without one', () => {
-    const { portable: _, ...windows } = manifest.windows;
-    expect(installers({ ...manifest, windows }).map((i) => i.label)).not.toContain(
+    const { portable: _, ...older } = windows;
+    expect(installers({ ...manifest, windows: older }).map((i) => i.label)).not.toContain(
       'Windows portable',
     );
+  });
+
+  it('lists only the platforms a release built', () => {
+    const { windows: _, ...linuxAndAndroid } = manifest;
+    expect(installers(linuxAndAndroid).map((i) => i.platform)).toEqual([
+      'linux',
+      'linux',
+      'android',
+    ]);
   });
 });
 
@@ -63,7 +74,7 @@ describe('platformOf', () => {
 
 describe('formatting', () => {
   it('names files from their URL and gives sizes in MB', () => {
-    expect(fileName(manifest.android.url)).toBe('newses-1.2.3.apk');
+    expect(fileName(android.url)).toBe('newses-1.2.3.apk');
     expect(formatSize(130_661_032)).toBe('130.7 MB');
   });
 });

@@ -69,6 +69,9 @@ The image is signed. To check it with [cosign](https://docs.sigstore.dev/cosign/
 | `NTFY_AUTH_ACCESS` | `*:up*:wo` | The bundled ntfy's access for everyone: `*:up*:deny` lets only users given access publish ([Push to Android](#push-to-android)) |
 | `PUSH_TOKENS` | unset | ntfy access tokens the server publishes with, comma-separated `host=token` pairs, for a ntfy that only lets users publish |
 | `NGINX_PROXY_NETWORK` | `nginx-proxy` | Existing Docker network of nginx-proxy |
+| `RELEASE_TAG` | unset | The tag your app downloads are built from, the installed version's, e.g. `v1.2.3` ([Your own app downloads](#your-own-app-downloads)) |
+| `APPS_PLATFORMS` | `linux,android` | The apps built: `linux`, `android`, or both |
+| `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | empty | Your Android release keystore, base64, its password, key alias, and key password, which sign the APK; empty builds no APK |
 
 Application variables, set in `compose.yaml`:
 
@@ -77,6 +80,7 @@ Application variables, set in `compose.yaml`:
 | `DATABASE_URL` | — | PostgreSQL connection URL |
 | `HOST`, `PORT` | `0.0.0.0`, `8080` | Server bind address inside the container |
 | `BLOB_DIR` | `/data/blobs` | Favicon and image cache, and the archive (`blobs` volume) |
+| `DOWNLOADS_DIR` | `/data/downloads` | Your own app downloads, served at `/downloads/` (`downloads` volume); unset serves none |
 | `PUSH_DISTRIBUTOR_URL` | `https://` and `NTFY_HOST` | UnifiedPush distributor the Android app suggests to readers |
 | `PUSH_TRUSTED_HOSTS` | `NTFY_HOST` | Comma-separated hosts whose push endpoints may be on private addresses, without allowing feeds there |
 
@@ -132,6 +136,8 @@ Download the newer release's compose file over yours, and start it; `.env` stays
 Add the `--profile` options the stack runs with to `up`. Migrations apply before the new server and worker start. Settings new in the release are in its sample settings ([Download](/download#server)).
 
 In a checkout: `git pull && C up -d --build`.
+
+With [your own app downloads](#your-own-app-downloads), build them again from the new version's tag, so the apps update too.
 
 ## Reverse proxy and TLS
 
@@ -190,6 +196,39 @@ Other apps' servers can then no longer push to readers through it.
 ## Apps
 
 Install the desktop and Android apps from [Download](/download) and enter the server's HTTPS address at first launch; see [Desktop and Android apps](./apps). The proxy needs the headers above.
+
+### Your own app downloads
+
+Your server can offer the desktop app for Linux and the Android app at `https://<your server>/downloads/`, built from the Newses source of your installed version. Apps installed from there update from your server rather than from the project's downloads. Windows and macOS apps are not built.
+
+The build runs from a checkout, on a linux/amd64 host (on arm64 Docker emulates it, slowly), and takes a few GB of disk and a while the first time.
+
+1. Set `PUBLIC_URL` in `.env` to the server's `https://` address: the apps check it for updates, over HTTPS only.
+2. For the Android app, create a release keystore, which signs every version you build. From a checkout, with JDK 21's `keytool`, and a folder on a drive you keep offline as the backup:
+
+   ```sh
+   scripts/android-signing-setup.sh --backup /media/backup --docker
+   ```
+
+   It writes the keystore to the backup folder, prints its password to keep in your password manager, and sets the `ANDROID_KEYSTORE_*` and `ANDROID_KEY_*` values in the checkout's `docker/.env`; copy those four lines to your install's `.env` if it is elsewhere. Losing the keystore or its password means installed apps can never be updated again. To build only the Linux app, set `APPS_PLATFORMS=linux` instead.
+3. Get the source of your installed version (the version in `compose.yaml`'s image), and set `RELEASE_TAG` in `.env` to its tag:
+
+   ```sh
+   git clone --depth 1 --branch v<version> https://github.com/newses-app/newses newses-source
+   ```
+
+4. Build, with your install's `.env`:
+
+   ```sh
+   docker compose --env-file ~/newses/.env -f newses-source/docker/compose.yaml \
+     -f newses-source/docker/compose.apps.yaml --profile apps run --rm apps
+   ```
+
+   In a checkout's own stack: `C -f docker/compose.apps.yaml --profile apps run --rm apps`.
+
+The apps, their checksums, and their bills of materials are then at `/downloads/`, with commands to install each; the server serves them from the `downloads` volume. Building again replaces them, and a release replaces the prerelease before it.
+
+An Android app signed with your keystore cannot update one installed from the project's downloads, or the reverse: to switch, uninstall the app first, which deletes its offline articles and sign-ins.
 
 ## Backups
 
