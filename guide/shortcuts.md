@@ -38,6 +38,7 @@ Feeds:
 
 | Keys | Action |
 |---|---|
+| `r` | Reload the list from the server, without checking the feeds |
 | `f r` | Update the feed |
 | `f a` | Show or hide feeds without unread articles |
 | `f s` | Subscribe to a feed |
@@ -62,6 +63,6 @@ Go to:
 
 ## Change them
 
-Settings > Shortcuts lists every action. "+" records up to four keys or two-key sequences for an action, which replace its defaults; keys already used elsewhere move to it, and a sequence cannot start with another's keys. Space, Tab, and keys pressed with Ctrl, Alt, or ⌘ cannot be used. Each action can be reset, or all with "Reset all shortcuts".
+Settings > Shortcuts lists every action. "+" records up to four keys or two-key sequences for an action, which replace its defaults; keys already used elsewhere move to it, and a sequence cannot start with another's keys. A shortcut that a new version adds never takes keys you chose. Space, Tab, and keys pressed with Ctrl, Alt, or ⌘ cannot be used. Each action can be reset, or all with "Reset all shortcuts".
 
 Your shortcuts are saved with your account, so they follow you to every device.

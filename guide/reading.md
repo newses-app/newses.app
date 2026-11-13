@@ -41,6 +41,8 @@ The toolbar above the list:
 
 On narrow screens, the less used ones move into "More actions", and the list and article show one at a time.
 
+On a touch screen, pulling the list down from its top reloads it from the server, as `r` does on a keyboard; unlike "Update now", it doesn't check the feeds.
+
 Settings > Preferences sets the defaults for "Show", "Sort", and the layout, and:
 - "Show a preview of each article in the list" (on).
 - "In the combined layout, mark articles read as they scroll past" (off).
