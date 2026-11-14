@@ -210,7 +210,7 @@ The build runs from a checkout, on a linux/amd64 host (on arm64 Docker emulates 
    scripts/android-signing-setup.sh --backup /media/backup --docker
    ```
 
-   It writes the keystore to the backup folder, prints its password to keep in your password manager, and sets the `ANDROID_KEYSTORE_*` and `ANDROID_KEY_*` values in the checkout's `docker/.env`; copy those four lines to your install's `.env` if it is elsewhere. Losing the keystore or its password means installed apps can never be updated again. To build only the Linux app, set `APPS_PLATFORMS=linux` instead.
+   It writes the keystore to the backup folder, prints its password to keep in your password manager, and sets the `ANDROID_KEYSTORE_*` and `ANDROID_KEY_*` values in the checkout's `docker/.env`; copy those four lines to your install's `.env` if it is elsewhere. Losing the keystore or its password means installed apps can never be updated again. To build only the Linux app, set `APPS_PLATFORMS=linux` instead, and keep the four lines in `.env` empty: Compose needs them there either way.
 3. Get the source of your installed version (the version in `compose.yaml`'s image), and set `RELEASE_TAG` in `.env` to its tag:
 
    ```sh
