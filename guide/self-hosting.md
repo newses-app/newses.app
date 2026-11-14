@@ -70,8 +70,11 @@ The image is signed. To check it with [cosign](https://docs.sigstore.dev/cosign/
 | `PUSH_TOKENS` | unset | ntfy access tokens the server publishes with, comma-separated `host=token` pairs, for a ntfy that only lets users publish |
 | `NGINX_PROXY_NETWORK` | `nginx-proxy` | Existing Docker network of nginx-proxy |
 | `RELEASE_TAG` | unset | The tag your app downloads are built from, the installed version's, e.g. `v1.2.3` ([Your own app downloads](#your-own-app-downloads)) |
-| `APPS_PLATFORMS` | `linux,android` | The apps built: `linux`, `android`, or both |
+| `APPS_PLATFORMS` | `linux,windows,android` | The apps built: `linux`, `windows`, `android`, comma-separated |
 | `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | empty | Your Android release keystore, base64, its password, key alias, and key password, which sign the APK; empty builds no APK |
+| `WIN_CERTIFICATE_BASE64`, `WIN_CERTIFICATE_PASSWORD` | empty | A code signing certificate (`.pfx`), base64, and its password, which sign the Windows apps |
+| `AZURE_CLIENT_SECRET`, `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `WIN_SIGNING_ENDPOINT`, `WIN_SIGNING_ACCOUNT_NAME`, `WIN_SIGNING_PROFILE_NAME` | empty | Azure Artifact Signing instead of a certificate file |
+| `WIN_PUBLISHER_NAME` | empty | The signing certificate's CN (common name), needed to sign: installed Windows apps update only to builds carrying it |
 
 Application variables, set in `compose.yaml`:
 
@@ -199,7 +202,7 @@ Install the desktop and Android apps from [Download](/download) and enter the se
 
 ### Your own app downloads
 
-Your server can offer the desktop app for Linux and the Android app at `https://<your server>/downloads/`, built from the Newses source of your installed version. Apps installed from there update from your server rather than from the project's downloads. Windows and macOS apps are not built.
+Your server can offer the desktop app for Linux and Windows and the Android app at `https://<your server>/downloads/`, built from the Newses source of your installed version. Apps installed from there update from your server rather than from the project's downloads. macOS apps are not built.
 
 The build runs from a checkout, on a linux/amd64 host (on arm64 Docker emulates it, slowly), and takes a few GB of disk and a while the first time.
 
@@ -210,14 +213,19 @@ The build runs from a checkout, on a linux/amd64 host (on arm64 Docker emulates 
    scripts/android-signing-setup.sh --backup /media/backup --docker
    ```
 
-   It writes the keystore to the backup folder, prints its password to keep in your password manager, and sets the `ANDROID_KEYSTORE_*` and `ANDROID_KEY_*` values in the checkout's `docker/.env`; copy those four lines to your install's `.env` if it is elsewhere. Losing the keystore or its password means installed apps can never be updated again. To build only the Linux app, set `APPS_PLATFORMS=linux` instead, and keep the four lines in `.env` empty: Compose needs them there either way.
-3. Get the source of your installed version (the version in `compose.yaml`'s image), and set `RELEASE_TAG` in `.env` to its tag:
+   It writes the keystore to the backup folder, prints its password to keep in your password manager, and sets the `ANDROID_KEYSTORE_*` and `ANDROID_KEY_*` values in the checkout's `docker/.env`; copy those four lines to your install's `.env` if it is elsewhere. Losing the keystore or its password means installed apps can never be updated again. To build without the Android app, leave `android` out of `APPS_PLATFORMS` instead.
+3. For the Windows apps, optionally, sign them, so that Windows runs them without a warning and the installer updates itself. Unsigned, they work, but the installer updates only through the downloads page. Either:
+   - set `WIN_CERTIFICATE_BASE64` to your code signing certificate (`.pfx`, `base64 -w0 cert.pfx`), `WIN_CERTIFICATE_PASSWORD` to its password, and `WIN_PUBLISHER_NAME` to its CN; or
+   - with an Azure Artifact Signing account and certificate profile, run `scripts/windows-signing-setup.sh --docker` from a checkout, signed in with `az login`, which sets those values and the publisher in the checkout's `docker/.env`. Each run replaces its app registration's secret.
+
+   Keep `WIN_CERTIFICATE_BASE64`, `WIN_CERTIFICATE_PASSWORD`, `AZURE_CLIENT_SECRET`, and the four Android lines in `.env` even when empty: Compose refuses to build without them.
+4. Get the source of your installed version (the version in `compose.yaml`'s image), and set `RELEASE_TAG` in `.env` to its tag:
 
    ```sh
    git clone --depth 1 --branch v<version> https://github.com/newses-app/newses newses-source
    ```
 
-4. Build, with your install's `.env`:
+5. Build, with your install's `.env`:
 
    ```sh
    docker compose --env-file ~/newses/.env -f newses-source/docker/compose.yaml \
@@ -228,7 +236,7 @@ The build runs from a checkout, on a linux/amd64 host (on arm64 Docker emulates 
 
 The apps, their checksums, and their bills of materials are then at `/downloads/`, with commands to install each; the server serves them from the `downloads` volume. Building again replaces them, and a release replaces the prerelease before it.
 
-An Android app signed with your keystore cannot update one installed from the project's downloads, or the reverse: to switch, uninstall the app first, which deletes its offline articles and sign-ins.
+An Android app signed with your keystore cannot update one installed from the project's downloads, or the reverse: to switch, uninstall the app first, which deletes its offline articles and sign-ins. A Windows installer updates only to builds signed for the same publisher.
 
 ## Backups
 
