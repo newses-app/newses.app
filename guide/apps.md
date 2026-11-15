@@ -77,7 +77,10 @@ Settings > Account > "App":
 
 Help > "About Newses" opens Settings > "About"; Help > "Chromium Licences" shows the licences of the browser engine the app runs on.
 
-On Android, sharing a link to Newses offers to subscribe to it or publish it.
+## Sharing
+
+- On Android, sharing a link to Newses offers to subscribe to it or publish it.
+- "Email" > "Share from this device" on an article opens Android's share sheet, or a new mail in your default mail app on the desktop ([Email an article](./sharing#email-an-article)).
 
 ## Where data is kept
 

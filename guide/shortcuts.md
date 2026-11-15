@@ -33,6 +33,7 @@ Article:
 | `a n` | Add or edit the note |
 | `a l` | Choose labels |
 | `T` | Edit tags |
+| `a m` | Email the article |
 
 Feeds:
 

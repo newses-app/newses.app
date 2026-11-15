@@ -1,5 +1,5 @@
 ---
-description: Your Newses password, two-factor sign-in with recovery codes, app passwords, signed-in devices, and how admins add users.
+description: Your Newses password, email address, two-factor sign-in with recovery codes, app passwords, signed-in devices, and how admins add users.
 ---
 
 # Account and security
@@ -9,6 +9,16 @@ Everything here is in Settings > Account.
 ## Password
 
 "Change password" needs at least 8 characters and not a common password; changing it signs out your other devices. An account an admin set up with a generated password asks for your own at the first sign-in; the generated one expires after 7 days.
+
+## Email address
+
+Where the server can send email, "Email" takes the address Newses mails you at:
+1. Enter it and choose "Send confirmation link".
+2. Open the link in the email, in any browser, and choose "Confirm address". The link works for 24 hours; the email is in your language.
+
+Until you confirm it, the address shows as waiting, with buttons to send the link again or cancel; an address you confirmed earlier keeps receiving mail meanwhile. Delete the address to stop all mail. Admins see your confirmed address in Settings > Users.
+
+Self-hosters turn email on with `SMTP_URL`; see [Email](./self-hosting#email).
 
 ## Two-factor sign-in
 
@@ -31,4 +41,4 @@ Apps that use the Tiny Tiny RSS or Google Reader API sign in with an app passwor
 
 ## Users
 
-Newses has no sign-up; admins add people. In Settings > Users, an admin creates users ("New user", optionally "Administrator"), resets passwords and two-factor sign-in, and disables or deletes users. A reset password signs the user out everywhere and stops their app passwords. Self-hosters can do the same from the command line; see [Users](./self-hosting#users).
+Newses has no sign-up; admins add people. In Settings > Users, an admin sees each user's confirmed email address, creates users ("New user", optionally "Administrator"), resets passwords and two-factor sign-in, and disables or deletes users. A reset password signs the user out everywhere and stops their app passwords. Self-hosters can do the same from the command line; see [Users](./self-hosting#users).
