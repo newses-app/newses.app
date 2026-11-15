@@ -51,9 +51,10 @@ The image is signed. To check it with [cosign](https://docs.sigstore.dev/cosign/
 | `OPS_RETENTION_DAYS` | `90` | Days of activity, request, site, and job statistics, and resolved alerts, kept for the Operations page |
 | `AUDIT_RETENTION_DAYS` | `365` | Days of audit events kept |
 | `OPS_HOST_HOURLY_BUDGET` | `200` | Requests to one site in an hour above which an alert opens |
-| `SMTP_URL` | unset | Mail server for alert emails, e.g. `smtps://user:password@mail.example.com:465` |
+| `SMTP_URL` | unset | Mail server the server emails users and alerts through, e.g. `smtps://user:password@mail.example.com:465`; unset sends no email |
+| `MAIL_FROM` | `Newses <newses@`*host*`>` | Sender of every email, on your `PUBLIC_URL` host (else `localhost`); use an address your mail server may send from. Users' own addresses only appear as reply-to |
 | `ALERT_EMAIL_TO` | unset | Address alerts are emailed to; needs `SMTP_URL`. Unset keeps alerts on the Operations page only |
-| `ALERT_EMAIL_FROM` | `Newses <newses@localhost>` | Sender of alert emails |
+| `ALERT_EMAIL_FROM` | `MAIL_FROM` | Sender of alert emails |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | unset | OTLP/HTTP endpoint for traces, metrics, and logs, e.g. `http://lgtm:4318` for the `observability` profile; unset turns OpenTelemetry off |
 | `OTEL_EXPORTER_OTLP_HEADERS` | unset | Headers for the endpoint, e.g. `authorization=Bearer …` |
 | `OTEL_TRACES_SAMPLER`, `OTEL_TRACES_SAMPLER_ARG` | `parentbased_always_on`, `1` | Trace sampling, e.g. `parentbased_traceidratio` and `0.1` |
@@ -165,6 +166,20 @@ The desktop and mobile apps need HTTPS. The proxy must forward the `Authorizatio
 `/api/v1/events` is a long-lived event stream. nginx and nginx-proxy need no extra configuration. Other proxies must not buffer its responses and must allow at least 30 s between bytes (the server sends a heartbeat every 25 s).
 
 The bundled ntfy needs its own virtual host for `NTFY_HOST`, forwarding to `NTFY_PORT` with WebSocket upgrades and the same long-lived connections (it sends a keepalive every 45 s), and `X-Forwarded-For`.
+
+## Email
+
+The server sends email through a mail server you give it in `SMTP_URL`; it does not deliver mail itself. Use your mail provider's SMTP submission service, or a relay you run:
+
+| Provider | `SMTP_URL` |
+|---|---|
+| Gmail (an app password) | `smtps://you%40gmail.com:app-password@smtp.gmail.com:465` |
+| Fastmail (an app password) | `smtps://you%40fastmail.com:app-password@smtp.fastmail.com:465` |
+| Amazon SES (SMTP credentials) | `smtp://user:password@email-smtp.us-east-1.amazonaws.com:587` |
+| Mailgun | `smtp://postmaster%40mg.example.com:password@smtp.mailgun.org:587` |
+| Postfix relay on your network | `smtp://mail.lan:25` |
+
+Percent-encode `@` and other reserved characters in the user name and password. Set `MAIL_FROM` to an address the provider lets you send from; recipients' servers reject or file as spam mail from a domain whose SPF and DKIM records don't cover the sender.
 
 ## Push to Android
 
