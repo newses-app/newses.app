@@ -1,5 +1,5 @@
 ---
-description: Your Newses password, email address, two-factor sign-in with recovery codes, app passwords, signed-in devices, and how admins add users.
+description: Your Newses password, email address and digest, two-factor sign-in with recovery codes, app passwords, signed-in devices, and how admins add users.
 ---
 
 # Account and security
@@ -19,6 +19,16 @@ Where the server can send email, "Email" takes the address Newses mails you at:
 Until you confirm it, the address shows as waiting, with buttons to send the link again or cancel; an address you confirmed earlier keeps receiving mail meanwhile. Delete the address to stop all mail. Admins see your confirmed address in Settings > Users.
 
 Self-hosters turn email on with `SMTP_URL`; see [Email](./self-hosting#email).
+
+## Email digest
+
+Under "Digest", once your address is confirmed, "Email digest" sends you the unread articles that came in since the last digest, daily or weekly:
+- "Day" (weekly) and "Time" set when it comes, in "Time zone", which starts as your device's.
+- It lists the articles shown in All articles, so not those of feeds hidden from it or scored below your threshold, newest first and at most 100, by category and feed, each with the start of its text, a link that opens it in Newses, and a link to the original; it counts the rest.
+- Nothing comes when no new article is unread.
+- "Mark the articles in a digest read" marks the ones it lists read once it is sent.
+
+The email is in your language. "Unsubscribe" in it, or your mail app's unsubscribe button, turns the digest off; turn it on again here. The server needs email and `PUBLIC_URL` for digests ([Configuration](./self-hosting#configuration)).
 
 ## Two-factor sign-in
 

@@ -33,10 +33,10 @@ The image is signed. To check it with [cosign](https://docs.sigstore.dev/cosign/
 | Variable | Default | Purpose |
 |---|---|---|
 | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | — | Database credentials; also used to build `DATABASE_URL` |
-| `APP_SECRET` | — | At least 32 characters; keys for encrypting stored 2FA secrets and feed passwords and for signing tokens. Back it up with the database: changing or losing it disables 2FA for every user, and feeds with a login stop updating until their readers enter the password again |
+| `APP_SECRET` | — | At least 32 characters; keys for encrypting stored 2FA secrets and feed passwords and for signing tokens. Back it up with the database: changing or losing it disables 2FA for every user, feeds with a login stop updating until their readers enter the password again, and the unsubscribe links in digests already sent stop working |
 | `HTTP_PORT` | `8080` | Host port for the server |
 | `LOG_LEVEL` | `info` | `trace`, `debug`, `info`, `warn`, `error`, `fatal`; `debug` and `trace` log request, feed, page, and image URLs (secret keys stay redacted), which reach OTLP too when it is on |
-| `PUBLIC_URL` | unset | The address readers use, e.g. `https://reader.example.com`; makes published-feed links absolute. Unset uses each request's address, which needs a proxy that forwards `Host` |
+| `PUBLIC_URL` | unset | The address readers use, e.g. `https://reader.example.com`; makes published-feed links absolute, and email digests need it for their links. Unset uses each request's address, which needs a proxy that forwards `Host` |
 | `INSTANCE_NAME` | unset | What the desktop and Android apps call this server, e.g. `Home` (up to 100 characters), naming its profiles `user @ Home`; unset uses the host |
 | `SOURCE_URL` | unset | Where Settings > "About" sends readers for this server's source code. Set it if you run changed code, as the AGPL requires; unset links the Newses repository at the image's version |
 | `COMPAT_TRACE` | `false` | `true` logs every TTRSS and Google Reader API call with its parameters (credentials redacted), to diagnose a client |
