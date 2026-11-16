@@ -58,6 +58,7 @@ The Newses project site at `newses.app`: landing page, user guides, contributor 
 | `guide/shortcuts.md` | Default keyboard shortcuts and remapping |
 | `guide/sharing.md` | Published feed, publishing pages, bookmarklets, share links |
 | `guide/account.md` | Password, two-factor sign-in, signed-in devices, adding users |
+| `guide/plugins.md` | Settings > Plugins: turning plugins on, approved hosts, settings and secrets, failing plugins, settings of removed plugins |
 | `guide/apps.md` | Desktop and Android apps: install, connect, profiles, updates, offline, desktop options, data |
 | `guide/clients.md` | TTRSS and Google Reader clients: app passwords, server URLs, known clients, what carries over |
 | `guide/faq.md` | Short answers that link to the page owning each fact |

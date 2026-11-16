@@ -117,9 +117,9 @@ Admins open Settings > Operations:
 |---|---|
 | Alerts | Open alerts and those resolved in the last 7 days; a banner when the worker's checks stopped |
 | Sites | Requests to each site in 24 hours or 7 days: outcomes, share answered "not modified", busiest hour against the budget, Retry-After pauses |
-| Jobs | Runs, failures, and durations of feed fetches, favicons, full text, and the scheduled tasks |
+| Jobs | Runs, failures, and durations of feed fetches, favicons, full text, plugins, and the scheduled tasks |
 | Users | Last seen, requests by app, and articles read over 7 and 30 days |
-| Audit log | Sign-ins, failed sign-ins, password, 2FA, app-password, and user changes |
+| Audit log | Sign-ins, failed sign-ins, password, 2FA, app-password, user, and plugin changes |
 
 The worker checks for problems every 5 minutes and emails changes to `ALERT_EMAIL_TO` when `SMTP_URL` is set.
 

@@ -144,6 +144,7 @@ const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
               { text: 'Keyboard shortcuts', link: '/guide/shortcuts' },
               { text: 'Sharing', link: '/guide/sharing' },
               { text: 'Account and security', link: '/guide/account' },
+              { text: 'Plugins', link: '/guide/plugins' },
             ],
           },
           {
