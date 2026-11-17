@@ -67,11 +67,13 @@ export default definePlugin({
 | `entries.added` | After entries arrive in a user's feeds, from a fetch or a new subscription | The user's id and up to 500 entries, each with its plain text (at most 20,000 characters) and content hash | Nothing |
 | `published.changed` | After entries join or leave a user's published feed, by any means | The entries now published, the ids that left, and the published feed's address | Nothing |
 | `digest.compose` | While a user's digest is being sent | The listed entries with their excerpts and content hashes, the digest's language and frequency, and how many more it counts | An overview, and text per entry id |
+| `test` | When someone presses "Send test" in Settings > Plugins | Nothing but the context, with the saved settings | `{ ok, message }`: whether it passed, and what happened as plain text (at most 500 characters), such as `HTTP 204 No Content` |
 
 - Event hooks (`entries.added`, `published.changed`) run after the change is saved, at least once, for each user the plugin is on for. `debounceSeconds` (0 to 3600) gathers the changes within that window of the first into one event. A run that throws or runs out of time is tried again after 1, 4, 16, and 64 minutes, then 4 and 6 hours, then dropped; the same changes may arrive twice, so make runs safe to repeat.
 - Entries are as the user sees them when the event is delivered: an entry deleted since is left out (or counts as unpublished). An entry's feed is the user's subscription; a feed with a login has no address, and pages saved from the web have no feed.
 - `digest.compose` returns plain text: never HTML or links, which the digest shows as written. Blank lines separate paragraphs; the overview may hold 4,000 characters, each entry's text 1,000, and text for entries the digest does not list is ignored. The digest goes out without a plugin that fails, runs out of time, or returns more.
-- Each hook may run for 60 seconds; then `context.signal` aborts and the run counts as failed.
+- Each hook may run for 60 seconds, a test for 30; then `context.signal` aborts and the run counts as failed.
+- A test runs for the user who pressed it when the plugin has user settings, else for the instance (an admin), while the plugin is on there. A test that throws fails with what it threw. Tests never count toward turning a plugin off.
 
 ## The context
 
@@ -99,6 +101,7 @@ export default definePlugin({
 ## Failures
 
 - A hook that throws, runs out of time, or returns what it may not counts as a failure; nothing it does fails a fetch, a page, or a digest.
+- What a hook throws is shown in Settings > Plugins to whoever owns the settings it ran with (its message, at most 300 characters): say what went wrong, such as `HTTP 401 Unauthorized`, and never put secrets in it.
 - After 10 failures in a row, the plugin is turned off: for the user, when the plugin has user settings and ran for a user, else for the instance, which raises the `plugin.disabled` alert. Turning it on again resets the count.
 - A plugin the server will not load (an `apiVersion` that does not accept the server's plugin API, an invalid definition, an id another plugin has) is left out, with the reason in the `plugin.refused` alert.
 
@@ -132,6 +135,7 @@ it('calls the build hook', async () => {
 
 | Export | Does |
 |---|---|
+| `runTest(plugin, options)` | Runs the `test` hook as "Send test" does, checking what it reports |
 | `runHook(plugin, hook, input, options)` | Checks the plugin accepts this plugin API, parses `settings` and `userSettings` with its schemas, runs the hook under its time limit (`timeoutMs` to shorten it), checks a digest hook's result, and returns it with the context; throws where the server would count a failure |
 | `createTestContext(options)` | A context: `fetch` reaches `hosts` only, through `options.fetch`, without following redirects; `logs` holds what was logged |
 | `MemoryStore` | Storage in memory with the server's limits and expiry (`now` sets its clock) |

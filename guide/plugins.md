@@ -21,13 +21,17 @@ Changes are recorded in the [audit log](./self-hosting#monitoring) as `plugin_up
 
 Plugins an admin turned on that you can use yourself show "For me": "On for me" turns one on, its settings are saved with "Save", and "Remove my settings" deletes your settings and what the plugin keeps for you.
 
+## Send test
+
+Plugins that can be tested show "Send test" under their settings: it runs the plugin with the saved settings, such as calling a webhook once, and shows what happened, such as the status code it got back. Save changes first. The plugin must be on, for the server or for you; tests never count toward turning it off.
+
 ## Secrets
 
 Settings such as API keys and tokens are secrets: stored encrypted, and never shown again. A saved secret says "Saved"; type a new value to replace it, or clear an optional one with its clear button, then "Save".
 
 ## When a plugin keeps failing
 
-A plugin that fails 10 times in a row is turned off, with how its last run failed:
+A plugin that fails 10 times in a row is turned off, with what its last run said (such as `HTTP 401 Unauthorized`) or how it failed:
 - When its own settings are yours, such as a webhook's address, it is turned off for you only. Check your settings, then turn it on again.
 - Otherwise it is turned off for the server, and admins get the `plugin.disabled` [alert](./self-hosting#monitoring). Turning it on again resolves it.
 
