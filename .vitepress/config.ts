@@ -154,6 +154,10 @@ const config: UserConfigFn<DefaultTheme.Config> = ({ command }) =>
               { text: 'Third-party clients', link: '/guide/clients' },
             ],
           },
+          {
+            text: 'Build on Newses',
+            items: [{ text: 'Writing plugins', link: '/guide/plugin-authors' }],
+          },
           { text: 'Help', items: [{ text: 'FAQ', link: '/guide/faq' }] },
         ],
         '/contributing/': [

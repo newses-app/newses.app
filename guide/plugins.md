@@ -4,7 +4,7 @@ description: Turn on the plugins installed on a Newses server, approve the hosts
 
 # Plugins
 
-Plugins add to what Newses does, such as calling a web address when your published feed changes. The server's operator installs them when deploying it: on Docker with the [plugins override](./self-hosting#plugins), on AWS by listing them, as npm packages at exact versions, in the stage's `plugins` in the deployment config, then `scripts/store-deploy-config.sh --apply --release dev` (or `prod`), which shows what changes and deploys the stage with them. Everything else is in Settings > Plugins. Admins always see the tab; others see it once plugins are installed.
+Plugins add to what Newses does, such as calling a web address when your published feed changes. The server's operator installs them when deploying it: on Docker with the [plugins override](./self-hosting#plugins), on AWS by listing them, as npm packages at exact versions, in the stage's `plugins` in the deployment config, then `scripts/store-deploy-config.sh --apply --release dev` (or `prod`), which shows what changes and deploys the stage with them. Everything else is in Settings > Plugins. Admins always see the tab; others see it once plugins are installed. To write one, see [Writing plugins](./plugin-authors).
 
 Plugins run inside the server with all its access, and the way they are written may still change. Install only plugins you trust.
 
