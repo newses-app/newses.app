@@ -12,7 +12,9 @@ import {
 // One step of installing or running the server, from the latest release. The page is rendered
 // without the release, so it never needs rebuilding for one; without scripts, or when the fetch
 // fails, it links the downloads page.
-const props = defineProps<{ part: 'install' | 'upgrade' | 'nginx-proxy' | 'verify' | 'image' }>();
+const props = defineProps<{
+  part: 'install' | 'upgrade' | 'nginx-proxy' | 'plugins' | 'verify' | 'image';
+}>();
 
 const downloads = __DOWNLOADS_URL__;
 const manifest = ref<ReleaseManifest>();
@@ -28,6 +30,7 @@ const commands = computed(() => {
     install: all.install,
     upgrade: all.upgrade,
     'nginx-proxy': all.nginxProxy,
+    plugins: all.plugins,
     verify: all.verify,
     image: all.image,
   }[props.part];
@@ -42,6 +45,8 @@ function shown(release: ReleaseManifest): [string, ReleaseFile][] {
     ];
   }
   if (props.part === 'nginx-proxy') return [[SERVER_FILES.nginxProxy, release.server.nginxProxy]];
+  if (props.part === 'plugins' && release.server.plugins)
+    return [[SERVER_FILES.plugins, release.server.plugins]];
   return [];
 }
 
@@ -72,7 +77,10 @@ onMounted(async () => {
 
 <template>
   <div class="server-install">
-    <template v-if="manifest && server">
+    <p v-if="manifest && server && commands.length === 0">
+      Newses {{ manifest.version }} has no plugins override; releases after it do.
+    </p>
+    <template v-else-if="manifest && server">
       <p v-if="part === 'install'" class="release">
         Newses {{ manifest.version }}
         <VPBadge v-if="manifest.prerelease" type="warning" text="Prerelease" />

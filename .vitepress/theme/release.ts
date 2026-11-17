@@ -30,6 +30,8 @@ export interface ServerRelease {
   compose: ReleaseFile;
   env: ReleaseFile;
   nginxProxy: ReleaseFile;
+  /** The override that installs plugins; releases before plugins have none. */
+  plugins?: ReleaseFile;
   publicKey: ReleaseFile;
 }
 
@@ -74,6 +76,7 @@ export const SERVER_FILES = {
   compose: 'compose.yaml',
   env: '.env',
   nginxProxy: 'compose.nginx-proxy.yaml',
+  plugins: 'compose.plugins.yaml',
   publicKey: 'cosign.pub',
 } as const;
 
@@ -96,6 +99,12 @@ export function serverCommands(server: ServerRelease) {
       ...fetchAndCheck(server.nginxProxy, SERVER_FILES.nginxProxy),
       `docker compose -f ${SERVER_FILES.compose} -f ${SERVER_FILES.nginxProxy} up -d`,
     ],
+    plugins: server.plugins
+      ? [
+          ...fetchAndCheck(server.plugins, SERVER_FILES.plugins),
+          `docker compose -f ${SERVER_FILES.compose} -f ${SERVER_FILES.plugins} up -d --build`,
+        ]
+      : [],
     verify: [
       ...fetchAndCheck(server.publicKey, SERVER_FILES.publicKey),
       `cosign verify --key ${SERVER_FILES.publicKey} ${repository}:${tag}`,
@@ -109,6 +118,7 @@ export const serverFiles = (server: ServerRelease) => [
   { label: 'Compose file', file: server.compose },
   { label: 'Sample settings', file: server.env },
   { label: 'nginx-proxy override', file: server.nginxProxy },
+  ...(server.plugins ? [{ label: 'Plugins override', file: server.plugins }] : []),
   { label: 'Image signing key', file: server.publicKey },
 ];
 

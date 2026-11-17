@@ -4,7 +4,7 @@ description: Turn on the plugins installed on a Newses server, approve the hosts
 
 # Plugins
 
-Plugins add to what Newses does, such as calling a web address when your published feed changes. The server's operator installs them when deploying it; everything else is in Settings > Plugins. Admins always see the tab; others see it once plugins are installed.
+Plugins add to what Newses does, such as calling a web address when your published feed changes. The server's operator installs them when deploying it: on Docker with the [plugins override](./self-hosting#plugins), on AWS by listing them, as npm packages at exact versions, in the stage's `plugins` in the deployment config, then `scripts/store-deploy-config.sh --apply --release dev` (or `prod`), which shows what changes and deploys the stage with them. Everything else is in Settings > Plugins. Admins always see the tab; others see it once plugins are installed.
 
 Plugins run inside the server with all its access, and the way they are written may still change. Install only plugins you trust.
 
@@ -32,6 +32,8 @@ A plugin that fails 10 times in a row is turned off, with how its last run faile
 - Otherwise it is turned off for the server, and admins get the `plugin.disabled` [alert](./self-hosting#monitoring). Turning it on again resolves it.
 
 A failing plugin never stops articles from arriving, pages from loading, or digests from going out.
+
+An installed plugin this version of Newses won't run, such as one written for another version of the plugin API, is left out of the tab, and admins get the `plugin.refused` [alert](./self-hosting#monitoring) with the reason until a deployment installs a version that works or removes it.
 
 ## Plugins no longer installed
 

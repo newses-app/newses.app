@@ -88,8 +88,10 @@ const server: ServerRelease = {
   compose: file('newses-1.2.3-compose.yaml'),
   env: file('newses-1.2.3-env.example'),
   nginxProxy: file('newses-1.2.3-compose.nginx-proxy.yaml'),
+  plugins: file('newses-1.2.3-compose.plugins.yaml'),
   publicKey: file('newses-1.2.3-cosign.pub'),
 };
+const { plugins: _, ...withoutPlugins } = server;
 const check = (name: string) => `echo '${'ab'.repeat(32)}  ${name}' | sha256sum -c`;
 
 describe('serverCommands', () => {
@@ -117,6 +119,15 @@ describe('serverCommands', () => {
     );
   });
 
+  it('builds the plugins image with the override, when the release has one', () => {
+    expect(serverCommands(server).plugins).toEqual([
+      `curl -fL -o compose.plugins.yaml ${server.plugins?.url ?? ''}`,
+      check('compose.plugins.yaml'),
+      'docker compose -f compose.yaml -f compose.plugins.yaml up -d --build',
+    ]);
+    expect(serverCommands(withoutPlugins).plugins).toEqual([]);
+  });
+
   it('verifies the image by tag with the release’s public key, and pulls it by tag or digest', () => {
     const commands = serverCommands(server);
     expect(commands.verify).toEqual([
@@ -137,8 +148,10 @@ describe('serverFiles', () => {
       'Compose file',
       'Sample settings',
       'nginx-proxy override',
+      'Plugins override',
       'Image signing key',
     ]);
+    expect(serverFiles(withoutPlugins).map((item) => item.label)).not.toContain('Plugins override');
   });
 });
 

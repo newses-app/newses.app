@@ -64,6 +64,7 @@ The image is signed. To check it with [cosign](https://docs.sigstore.dev/cosign/
 | `NEWSES_IMAGE` | The release's image; in a checkout, `newses:latest` | Image to run; in a checkout, the tag it builds |
 | `COMPOSE_PROJECT_NAME` | `newses` | Prefix of container and volume names; a stack created as `rss-reader` keeps that name to keep its volumes |
 | `VIRTUAL_HOST`, `LETSENCRYPT_HOST` | unset | Public hostname for nginx-proxy and acme-companion (`compose.nginx-proxy.yaml`) |
+| `PLUGINS` | unset | [Plugins](#plugins) to install with `compose.plugins.yaml`: npm packages at exact versions, separated by spaces, e.g. `@newses/plugin-webhook@1.0.0` |
 | `COMPOSE_PROFILES` | unset | Optional services to run, comma-separated: `ntfy` ([Push to Android](#push-to-android)), `backup`, `observability` |
 | `NTFY_HOST` | unset | Hostname of the bundled ntfy (`ntfy` profile), e.g. `ntfy.example.com`; the Android app suggests it, and the server reaches it even on a private address |
 | `NTFY_PORT` | `8081` | Host port the bundled ntfy is published on, for your proxy |
@@ -142,6 +143,20 @@ Add the `--profile` options the stack runs with to `up`. Migrations apply before
 In a checkout: `git pull && C up -d --build`.
 
 With [your own app downloads](#your-own-app-downloads), build them again from the new version's tag, so the apps update too.
+
+## Plugins
+
+Plugins are npm packages installed into an image built from the release's, when you build it, never while Newses runs. They run inside the server with access to all its data, and the way they are written may still change: install only plugins you trust. Turning them on and setting them up is in [Plugins](./plugins).
+
+1. In `.env`, set `PLUGINS` to the packages at exact versions, separated by spaces: `PLUGINS=@newses/plugin-webhook@1.0.0`.
+2. Download the override, beside `compose.yaml`, and build and start with both (Docker Compose 2.24.4 or later):
+
+   <ServerInstall part="plugins" />
+
+   In a checkout, the override builds on the checkout's image, which it does not build itself: run `docker compose -f docker/compose.yaml build` first, and again after each `git pull`, then `C -f docker/compose.plugins.yaml up -d --build`.
+3. From then on, `C` names both files, and every `up` adds `--build`: `docker compose -f compose.yaml -f compose.plugins.yaml up -d --build`. With [nginx-proxy](#nginx-proxy), name all three files.
+
+To upgrade or remove plugins, change `PLUGINS` and run `C up -d --build` again; upgrading Newses rebuilds them on the new release. The build fails on a package that is not at an exact version, has known high or critical vulnerabilities, brings its own copy of `zod` or `@newses/plugin-api`, or has a licence Newses cannot ship with. A plugin that installs but that this version of Newses refuses, such as one written for another version of the plugin API, is left out, with the reason in the `plugin.refused` [alert](#monitoring).
 
 ## Reverse proxy and TLS
 
