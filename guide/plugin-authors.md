@@ -66,7 +66,7 @@ export default definePlugin({
 |---|---|---|---|
 | `entries.added` | After entries arrive in a user's feeds, from a fetch or a new subscription | The user's id and up to 500 entries, each with its plain text (at most 20,000 characters) and content hash | Nothing |
 | `published.changed` | After entries join or leave a user's published feed, by any means | The entries now published, the ids that left, and the published feed's address | Nothing |
-| `digest.compose` | While a user's digest is being sent | The listed entries with their excerpts and content hashes, the digest's language and frequency, and how many more it counts | An overview, and text per entry id |
+| `digest.compose` | While a user's digest is being sent | The listed entries with their excerpts and content hashes, the digest's language and frequency, how many more it counts, and the first 2,000 of those (`unlisted`, from plugin API 0.1.1) | An overview, and text per entry id |
 | `test` | When someone presses "Send test" in Settings > Plugins | Nothing but the context, with the saved settings | `{ ok, message }`: whether it passed, and what happened as plain text (at most 500 characters), such as `HTTP 204 No Content` |
 
 - Event hooks (`entries.added`, `published.changed`) run after the change is saved, at least once, for each user the plugin is on for. `debounceSeconds` (0 to 3600) gathers the changes within that window of the first into one event. A run that throws or runs out of time is tried again after 1, 4, 16, and 64 minutes, then 4 and 6 hours, then dropped; the same changes may arrive twice, so make runs safe to repeat.
@@ -94,8 +94,8 @@ export default definePlugin({
 ## Settings
 
 - Settings are zod object schemas. The server checks saved settings against them, and the hook gets what the schema gives, defaults applied.
-- `secret()` marks a setting stored encrypted and never shown again, such as an API key; `url()` an http(s) address on an approved host, and `url({ secret: true })` one holding a token; `multiline()` a larger text box. Only top-level settings may be marked.
-- Settings > Plugins builds the form from the schema: text, multi-line text, addresses, secrets, booleans, choices (`z.enum`), numbers, and lists of objects of those. A setting of another kind is kept as saved.
+- `secret()` marks a setting stored encrypted and never shown again, such as an API key; `url()` an http(s) address on an approved host, and `url({ secret: true })` one holding a token; `multiline()` a larger text box; `feeds()` some of the user's feeds, as the subscription ids entries carry in `feed.id` (from plugin API 0.1.1, user settings only). Only top-level settings may be marked.
+- Settings > Plugins builds the form from the schema: text, multi-line text, addresses, secrets, booleans, choices (`z.enum`), numbers, a picker of the user's feeds, and lists of objects of those. A setting of another kind is kept as saved.
 - `messages` are plain text per language tag (`en`, `de`, `pt-BR`): `name`, `description` (say what the plugin sends, and to whom), `settings.<field>`, `settings.<field>.hint`, `settings.<field>.option.<value>`, and `settings.<field>.item.<property>`. A missing message falls back to the language without a region, then English, then the key.
 
 ## Failures
@@ -140,6 +140,8 @@ it('calls the build hook', async () => {
 | `createTestContext(options)` | A context: `fetch` reaches `hosts` only, through `options.fetch`, without following redirects; `logs` holds what was logged |
 | `MemoryStore` | Storage in memory with the server's limits and expiry (`now` sets its clock) |
 | `fixtureEntry`, `fixtureEntryWithText`, `fixtureDigestEntry` | Entries as the hooks get them, any field overridden |
+
+To try a plugin in a running Newses before publishing it, pack it with `npm pack` and install the file in a Docker install ([Trying a plugin before it is published](./self-hosting#trying-a-plugin-before-it-is-published)).
 
 ## Publishing
 

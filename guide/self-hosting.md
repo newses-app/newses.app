@@ -158,6 +158,16 @@ Plugins are npm packages installed into an image built from the release's, when 
 
 To upgrade or remove plugins, change `PLUGINS` and run `C up -d --build` again; upgrading Newses rebuilds them on the new release. The build fails on a package that is not at an exact version, has known high or critical vulnerabilities, brings its own copy of `zod` or `@newses/plugin-api`, or has a licence Newses cannot ship with. A plugin that installs but that this version of Newses refuses, such as one written for another version of the plugin API, is left out, with the reason in the `plugin.refused` [alert](#monitoring).
 
+### Trying a plugin before it is published
+
+A plugin can be installed from a file packed with `npm pack`, to try a build that is not on npm:
+
+1. In the plugin's folder, pack it into a `plugins` folder beside `compose.yaml` (in a checkout, `docker/plugins`): `npm pack --pack-destination /path/to/plugins`.
+2. List the file in `PLUGINS` by its path, beside packages from npm: `PLUGINS=@newses/plugin-webhook@1.0.0 ./plugins/newses-plugin-example-0.1.0.tgz`.
+3. Run `C up -d --build`. Settings > Plugins shows the plugin's source as that path.
+
+After a change, pack it again and run `C up -d --build`: the build installs the new file, even under the same name. The same checks apply as to packages from npm. To stop, remove it from `PLUGINS` and run `C up -d --build`.
+
 ## Reverse proxy and TLS
 
 ### nginx-proxy
