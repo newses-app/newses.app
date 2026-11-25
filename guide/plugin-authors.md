@@ -74,7 +74,7 @@ export default definePlugin({
 - Event hooks (`entries.added`, `published.changed`) run after the change is saved, at least once, for each user the plugin is on for. `debounceSeconds` (0 to 3600) gathers the changes within that window of the first into one event. A run that throws or runs out of time is tried again after 1, 4, 16, and 64 minutes, then 4 and 6 hours, then dropped; the same changes may arrive twice, so make runs safe to repeat.
 - Entries are as the user sees them when the event is delivered: an entry deleted since is left out (or counts as unpublished). An entry's feed is the user's subscription; a feed with a login has no address, and pages saved from the web have no feed.
 - `digest.compose` returns plain text: never HTML or links, which the digest shows as written. Blank lines separate paragraphs; the overview may hold 4,000 characters, each entry's text 1,000, and text for entries the digest does not list is ignored. The digest goes out without a plugin that fails, runs out of time, or returns more.
-- Each hook may run for 60 seconds, a test for 30; then `context.signal` aborts and the run counts as failed.
+- Each hook may run for 60 seconds, `digest.compose` for 5 minutes (from plugin API 0.1.1), and a test for 30; then `context.signal` aborts and the run counts as failed.
 - A test runs for the user who pressed it when the plugin has user settings, else for the instance (an admin), while the plugin is on there. A test that throws fails with what it threw. Tests never count toward turning a plugin off.
 
 ## The context
