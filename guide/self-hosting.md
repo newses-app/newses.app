@@ -65,7 +65,8 @@ The image is signed. To check it with [cosign](https://docs.sigstore.dev/cosign/
 | `COMPOSE_PROJECT_NAME` | `newses` | Prefix of container and volume names; a stack created as `rss-reader` keeps that name to keep its volumes |
 | `VIRTUAL_HOST`, `LETSENCRYPT_HOST` | unset | Public hostname for nginx-proxy and acme-companion (`compose.nginx-proxy.yaml`) |
 | `PLUGINS` | unset | [Plugins](#plugins) to install with `compose.plugins.yaml`: npm packages at exact versions, separated by spaces, e.g. `@newses/plugin-webhook@1.0.0` |
-| `COMPOSE_PROFILES` | unset | Optional services to run, comma-separated: `ntfy` ([Push to Android](#push-to-android)), `backup`, `observability` |
+| `COMPOSE_PROFILES` | unset | Optional services every `C` command runs, comma-separated: `backup` ([Backups](#backups)), `observability` ([Monitoring](#monitoring)), `ntfy` ([Push to Android](#push-to-android)) |
+| `COMPOSE_FILE` | unset | The compose files `docker compose` uses when run in the folder with `.env` and given no `-f`, separated by colons, e.g. `compose.yaml:compose.plugins.yaml` |
 | `NTFY_HOST` | unset | Hostname of the bundled ntfy (`ntfy` profile), e.g. `ntfy.example.com`; the Android app suggests it, and the server reaches it even on a private address |
 | `NTFY_PORT` | `8081` | Host port the bundled ntfy is published on, for your proxy |
 | `NTFY_AUTH_ACCESS` | `*:up*:wo` | The bundled ntfy's access for everyone: `*:up*:deny` lets only users given access publish ([Push to Android](#push-to-android)) |
@@ -126,8 +127,8 @@ The worker checks for problems every 5 minutes and emails changes to `ALERT_EMAI
 
 Traces, metrics, and logs:
 
-1. Set `OTEL_EXPORTER_OTLP_ENDPOINT=http://lgtm:4318` in `.env`.
-2. `C --profile observability up -d`
+1. In `.env`, set `OTEL_EXPORTER_OTLP_ENDPOINT=http://lgtm:4318` and add `observability` to `COMPOSE_PROFILES`.
+2. `C up -d`
 3. Open `http://127.0.0.1:3000` (on the Docker host; tunnel with `ssh -L 3000:127.0.0.1:3000` from elsewhere). Grafana allows anonymous admin access, so keep it off public interfaces. The `newses` folder has dashboards for the overview, API, jobs, remote sites, and runtime; Explore searches traces (Tempo) and logs (Loki).
 
 Any OTLP/HTTP backend works instead of the bundled one. Telemetry carries route patterns and host names, never credentials, feed URLs, or article content.
@@ -138,7 +139,7 @@ Download the newer release's compose file over yours, and start it; `.env` stays
 
 <ServerInstall part="upgrade" />
 
-Add the `--profile` options the stack runs with to `up`. Migrations apply before the new server and worker start. Settings new in the release are in its sample settings ([Download](/download#server)).
+Migrations apply before the new server and worker start. Settings new in the release are in its sample settings ([Download](/download#server)).
 
 In a checkout: `git pull && C up -d --build`.
 
@@ -154,7 +155,7 @@ Plugins are npm packages installed into an image built from the release's, when 
    <ServerInstall part="plugins" />
 
    In a checkout, the override builds on the checkout's image, which it does not build itself: run `docker compose -f docker/compose.yaml build` first, and again after each `git pull`, then `C -f docker/compose.plugins.yaml up -d --build`.
-3. From then on, `C` names both files, and every `up` adds `--build`: `docker compose -f compose.yaml -f compose.plugins.yaml up -d --build`. With [nginx-proxy](#nginx-proxy), name all three files.
+3. From then on, `C` names both files, and every `up` adds `--build`: `docker compose -f compose.yaml -f compose.plugins.yaml up -d --build`. With [nginx-proxy](#nginx-proxy), name all three files. To name them once instead, set `COMPOSE_FILE=compose.yaml:compose.plugins.yaml` in `.env`, and run plain `docker compose` in its folder (in a checkout, `docker`).
 
 To upgrade or remove plugins, change `PLUGINS` and run `C up -d --build` again; upgrading Newses rebuilds them on the new release. The build fails on a package that is not at an exact version, has known high or critical vulnerabilities, brings its own copy of `zod` or `@newses/plugin-api`, or has a licence Newses cannot ship with. A plugin that installs but that this version of Newses refuses, such as one written for another version of the plugin API, is left out, with the reason in the `plugin.refused` [alert](#monitoring).
 
@@ -178,7 +179,7 @@ After a change, pack it again and run `C up -d --build`: the build installs the 
    <ServerInstall part="nginx-proxy" />
 
    In a checkout: `C -f docker/compose.nginx-proxy.yaml up -d`.
-3. From then on, `C` names both files: `docker compose -f compose.yaml -f compose.nginx-proxy.yaml`, in a checkout `docker compose -f docker/compose.yaml -f docker/compose.nginx-proxy.yaml`.
+3. From then on, `C` names both files: `docker compose -f compose.yaml -f compose.nginx-proxy.yaml`, in a checkout `docker compose -f docker/compose.yaml -f docker/compose.nginx-proxy.yaml`; or set `COMPOSE_FILE=compose.yaml:compose.nginx-proxy.yaml` in `.env`, as for [plugins](#plugins).
 
 The server then joins the proxy network and is not published on the host. `TRUST_PROXY` defaults to `1`, the proxy being the only hop.
 
@@ -280,7 +281,7 @@ An Android app signed with your keystore cannot update one installed from the pr
 
 ## Backups
 
-- Enable nightly dumps with `C --profile backup up -d`. Dumps go to the `backups` volume as `newses-YYYYMMDD-HHMMSS.dump` and are pruned after `BACKUP_RETENTION_DAYS`.
+- Enable nightly dumps by adding `backup` to `COMPOSE_PROFILES` in `.env`, then `C up -d`. Dumps go to the `backups` volume as `newses-YYYYMMDD-HHMMSS.dump` and are pruned after `BACKUP_RETENTION_DAYS`.
 - Take an ad-hoc dump with `C exec db sh -c 'pg_dump -U "$POSTGRES_USER" -Fc "$POSTGRES_DB"' > newses.dump`.
 - Back up the `blobs` volume too. Favicons and cached images re-fetch, but the archive (`archive/` in the volume) is not in the dumps and cannot be re-fetched. `scripts/export-instance.sh` writes both to one bundle, which `scripts/restore-instance.sh` loads ([Moving to another instance](#moving-to-another-instance)).
 
@@ -334,7 +335,7 @@ The release's compose file has the checkout's project name (`newses`, or `COMPOS
 
 1. Download the files as in [Install](#install) step 1, then copy the checkout's `docker/.env` over `.env`, and remove `NEWSES_IMAGE` from it if set.
 2. In the checkout: `docker compose -f docker/compose.yaml down`. The volumes stay.
-3. In the new folder: `docker compose up -d`, with the `--profile` options the stack ran with.
+3. In the new folder: `docker compose up -d`.
 
 ## Without Compose
 

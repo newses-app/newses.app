@@ -28,6 +28,8 @@ Under "Digest", once your address is confirmed, "Email digest" sends you the unr
 - Nothing comes when no new article is unread.
 - "Mark the articles in a digest read" marks the ones it lists read once it is sent.
 
+"Send a test digest" emails you one now, within a minute or so, whether or not your digest is on: the unread articles that came in over the last day, with what your plugins add and, for any that added nothing, why. It changes nothing: your next digest comes as it would have, and no article is marked read. It needs an unread article from the last day.
+
 The email is in your language. "Unsubscribe" in it, or your mail app's unsubscribe button, turns the digest off; turn it on again here. The server needs email and `PUBLIC_URL` for digests ([Configuration](./self-hosting#configuration)).
 
 ## Two-factor sign-in
