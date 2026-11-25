@@ -25,7 +25,7 @@ Plugins an admin turned on that you can use yourself show "For me": "On for me" 
 
 Plugins that can be tested show "Send test" under their settings: it runs the plugin with the saved settings, such as calling a webhook once, and shows what happened, such as the status code it got back. Save changes first. The plugin must be on, for the server or for you; tests never count toward turning it off.
 
-For a plugin that adds to your digest, such as the digest summary, "Send test" under "For me" then sends you a test digest, as "Send a test digest" does in [your account's digest settings](./account#email-digest): it shows what the plugin adds, or why it added nothing. "Estimate cost", for plugins that can, says what such a test digest would cost now, without sending it.
+For a plugin that adds to your digest, such as the digest summary, "Send test" under "For me" then sends you a test digest, as "Send a test digest" does in [your account's digest settings](./account#email-digest): it shows what the plugin adds, or why it added nothing. Plugins may add their own buttons beside "Send test", such as the digest summary's "Estimate cost", which says what such a test digest would cost now, without sending it.
 
 ## Secrets
 
